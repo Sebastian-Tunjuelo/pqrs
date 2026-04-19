@@ -42,9 +42,13 @@ export default async function BancoQaPage() {
                 Cargue el semillero SQL (recomendado con el resto de seeds) o use el CLI Python desde la raíz del repo:
               </p>
               <pre className="mt-2 overflow-x-auto rounded-md bg-white/80 p-2 text-xs text-slate-800">
-                {`Get-Content .\\data\\seed\\seed_banco_qa.sql -Raw | docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
+                {`REM En CMD.exe (símbolo del sistema):
+scripts\\seed_banco_qa.cmd
 
-# o bien:
+REM En PowerShell:
+Get-Content .\\data\\seed\\seed_banco_qa.sql -Raw | docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
+
+REM Alternativa Python:
 # pip install -e .\\contexts\\banco_qa
 # py -3.12 -m banco_qa.cli seed --file glosarios\\banco_qa.yaml`}
               </pre>

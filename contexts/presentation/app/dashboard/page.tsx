@@ -42,10 +42,10 @@ export default async function DashboardPage() {
     territorios.map((t) => [
       t.codigo,
       {
-        pendientes: t.pendientes,
-        en_tramite: t.en_tramite,
-        respondidas: t.respondidas,
-        vencidas: t.vencidas
+        pendientes: t.pendientes ?? 0,
+        en_tramite: t.en_tramite ?? 0,
+        respondidas: t.respondidas ?? 0,
+        vencidas: t.vencidas ?? 0
       }
     ])
   );

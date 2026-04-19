@@ -36,13 +36,24 @@ function categoriaDominante(e: EstadoComuna): "vencida" | "pendiente" | "tramite
   return mejor;
 }
 
+/** Escala azul por volumen (cuando hay PQRS pero sin buckets de gestión conocidos). */
+function colorSoloVolumen(n: number, maxN: number): string {
+  if (maxN <= 0 || n <= 0) return "#e2e8f0";
+  const t = Math.min(1, n / maxN);
+  const h = 210;
+  const s = 70;
+  const l = 92 - t * 38;
+  return `hsl(${h} ${s}% ${l}%)`;
+}
+
 /** Color por estado de gestión dominante; intensidad según volumen vs máximo en el mapa. */
 function colorPorEstado(
   categoria: ReturnType<typeof categoriaDominante>,
   n: number,
   maxN: number
 ): string {
-  if (categoria === "sin_datos" || maxN <= 0 || n <= 0) return "#e2e8f0";
+  if (n <= 0 || maxN <= 0) return "#e2e8f0";
+  if (categoria === "sin_datos") return colorSoloVolumen(n, maxN);
   const t = Math.min(1, n / maxN);
   const l = 88 - t * 42;
   switch (categoria) {
@@ -127,7 +138,9 @@ export default function DashboardMap({
       const cat = categoriaDominante(est);
       const catLabel =
         cat === "sin_datos"
-          ? "Sin PQRS"
+          ? n <= 0
+            ? "Sin PQRS"
+            : "PQRS sin estado de gestión reconocido (color = volumen)"
           : cat === "vencida"
             ? "Predomina: vencidas"
             : cat === "pendiente"
@@ -187,6 +200,10 @@ export default function DashboardMap({
           <li className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-sm bg-slate-200" />
             Sin PQRS
+          </li>
+          <li className="flex items-center gap-1">
+            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "hsl(210 70% 58%)" }} />
+            Solo volumen (gestión NULL u otro valor)
           </li>
         </ul>
       </div>

@@ -26,7 +26,15 @@ Si en el PC ya corre **otro PostgreSQL en el puerto 5432**, las conexiones a `lo
 .\scripts\verify_local.ps1
 ```
 
-Hace: Compose → espera Postgres → Alembic → seeds `dim_*` → 200 PQRS demo. No arranca la API ni Next (indica comandos al final).
+Hace: Compose → espera Postgres → Alembic → seeds `dim_*` → **banco Q&A** → 200 PQRS demo. No arranca la API ni Next (indica comandos al final).
+
+**Solo sembrar banco Q&A** (use esto si en **CMD** le falló `Get-Content`: ese comando es de **PowerShell**):
+
+```bat
+scripts\seed_banco_qa.cmd
+```
+
+**Asistente Ollama en la API:** tras cambios en `contexts/api`, recompile y reinicie la API (`scripts\build_api_windows.cmd build` o `cargo build`). Ollama debe estar arriba (`docker compose up -d`) y el modelo descargado (`docker compose exec ollama ollama pull llama3.2:3b`). Variables opcionales: `OLLAMA_URL` (p. ej. `http://127.0.0.1:11434`), `OLLAMA_MODEL`.
 
 ---
 
