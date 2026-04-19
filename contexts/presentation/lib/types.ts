@@ -83,6 +83,7 @@ export type MetricasDashboard = {
   por_riesgo: Record<string, number>;
   por_nivel_riesgo: Record<string, number>;
   tasa_clasificacion_correcta?: number | null;
+  tendencia_semanal?: { semana: string; total: number }[];
 };
 
 export type SecretariaRow = {

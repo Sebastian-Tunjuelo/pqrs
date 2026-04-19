@@ -38,7 +38,7 @@ export function RiesgoBarChart({ porNivel }: { porNivel: Record<string, number> 
             type: "bar",
             x,
             y,
-            marker: { color: "#2563eb" }
+            marker: { color: "#00693E" }
           }
         ]}
         layout={{

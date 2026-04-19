@@ -58,17 +58,28 @@ Servicios: `postgres` (PostGIS), `redis`, `ollama`.
 Hace: espera Postgres → `pip install -e contexts/warehouse` → **Alembic `upgrade head`** → SQL `data/seed/seed_dim_secretaria.sql`, `seed_dim_territorio.sql`, `seed_banco_qa.sql` → **~200 PQRS demo** (`scripts/demo_seed_pqrs.py --purge`).  
 **No arranca** la API ni Next; solo deja la BD lista.
 
-### 3. API Rust (obligatoria para el frontend útil)
+### 3. Worker de síntesis (Resumen IA en detalle PQRS)
+
+La API encola trabajos en Redis (`pqrs.summary.jobs`); sin este proceso verá **502** al pedir síntesis.
+
+```powershell
+.\scripts\_run_summary_worker.ps1
+```
+
+(Requiere Docker con **Redis** y **Ollama** en marcha, y modelo `llama3.2:3b` u otro compatible.)
+
+### 4. API Rust (obligatoria para el frontend útil)
 
 ```powershell
 cd contexts\api
 $env:DATABASE_URL = "postgresql://pqrs:pqrs@localhost:5433/pqrs?sslmode=disable"
+$env:REDIS_URL = "redis://127.0.0.1:6379/0"
 cargo run
 ```
 
-Por defecto escucha en el puerto definido por la app (típicamente **8080**).
+`REDIS_URL` habilita síntesis bajo demanda y cola de resúmenes. Por defecto escucha en **8080**.
 
-### 4. Next.js (interfaz web)
+### 5. Next.js (interfaz web)
 
 En **otra** terminal, raíz del repo o carpeta presentation:
 
@@ -98,7 +109,7 @@ Abre **`http://localhost:3000`**. Si la pestaña queda **en blanco**, casi siemp
 ```
 
 o doble clic en `scripts\start_stack.cmd`.  
-Levanta Docker (si hace falta), espera Postgres, y lanza **`_run_api.ps1`** y **`_run_next.ps1`** en procesos nuevos. **`_run_next.ps1`** intenta liberar el puerto **3000** si hay un Node previo.
+Levanta Docker (si hace falta), espera Postgres, y lanza **`_run_summary_worker.ps1`**, **`_run_api.ps1`** y **`_run_next.ps1`** en ventanas separadas. **`_run_next.ps1`** intenta liberar el puerto **3000** si hay un Node previo.
 
 ### Verificación / CI local (sin depender de `run_all.ps1`)
 
@@ -116,7 +127,8 @@ Si el usuario pide “correr todo” **por comandos explícitos**: Docker + paso
 | `data/seed/*.sql` | Dimensiones y banco Q&A sembrados por `verify_local.ps1`. |
 | `scripts/demo_seed_pqrs.py` | PQRS sintéticas demo (arquetipos aceptada / ilegible / ofensivo). |
 | `scripts/verify_local.ps1` | Orquesta BD local (Compose + Alembic + seeds + demo). |
-| `scripts/start_stack.ps1` | Arranque Docker + ventanas API + Next. |
+| `scripts/start_stack.ps1` | Arranque Docker + ventanas worker síntesis + API + Next. |
+| `scripts/_run_summary_worker.ps1` | Worker Redis/Ollama para síntesis en detalle PQRS. |
 | `scripts/_resolve_python.ps1` | Resuelve ejecutable Python 3.11+ para los scripts. |
 | `shared-kernel/` | Eventos y tipos compartidos (Python). |
 | `contexts/ingestion`, `classification`, `prioritization`, `routing` | Dominio Python por contexto. |
@@ -143,6 +155,7 @@ El frontend usa `NEXT_PUBLIC_API_URL` (fetch desde servidor o cliente según la 
 2. **Error de contraseña Postgres** — Suele ser conexión al **5432** local equivocado; usar **5433** (host) hacia el contenedor.
 3. **API sin tablas** — Ejecutar `verify_local.ps1` (Alembic + seeds).
 4. **Pytest “ModuleNotFoundError: tests.xxx”** al mezclar rutas — Ejecutar `pytest` **desde dentro** de cada paquete (`cd shared-kernel; pytest tests`).
+5. **502 en “Resumen IA” / timeout de síntesis** — Falta **`_run_summary_worker.ps1`** o la API sin **`REDIS_URL`**; Ollama saturado (muchas inferencias a la vez).
 
 ---
 

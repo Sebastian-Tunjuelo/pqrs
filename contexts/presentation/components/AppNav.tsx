@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 const links = [
   { href: "/gestion", label: "Gestión" },
@@ -9,22 +12,42 @@ const links = [
 ] as const;
 
 export function AppNav() {
+  const [open, setOpen] = useState(true);
+
   return (
-    <aside className="hidden w-56 shrink-0 border-r border-neutral-100 bg-white md:block">
-      <div className="sticky top-0 flex h-screen flex-col gap-6 px-4 py-6">
-        <Link href="/" className="block">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Alcaldía de Medellín</p>
+    <aside
+      className={`hidden shrink-0 border-r border-neutral-100 bg-white transition-[width] duration-200 ease-out md:block ${
+        open ? "w-56" : "w-[4.5rem]"
+      }`}
+    >
+      <div className="sticky top-0 flex h-screen flex-col gap-4 px-2 py-6">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+          title={open ? "Contraer menú" : "Expandir menú"}
+          aria-expanded={open}
+        >
+          {open ? "«" : "»"}
+        </button>
+        <Link href="/" className={`block px-2 ${!open ? "text-center" : ""}`}>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-primary">
+            {open ? "Alcaldía de Medellín" : "AM"}
+          </p>
           <p className="mt-1 text-lg font-bold text-neutral-900">PQRS</p>
-          <p className="text-xs text-neutral-900/50">Validación humana + IA</p>
+          {open ? <p className="text-xs text-neutral-900/50">Validación + IA</p> : null}
         </Link>
         <nav className="flex flex-col gap-1 text-sm font-medium">
           {links.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              className="rounded-lg px-3 py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-primary"
+              title={!open ? label : undefined}
+              className={`rounded-lg py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-primary ${
+                open ? "px-3" : "px-0 text-center text-xs"
+              }`}
             >
-              {label}
+              {open ? label : label.slice(0, 2)}
             </Link>
           ))}
         </nav>

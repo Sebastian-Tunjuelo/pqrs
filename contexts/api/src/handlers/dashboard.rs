@@ -1,4 +1,5 @@
 use axum::{extract::State, Json};
+use chrono::NaiveDate;
 use serde_json::{json, Map, Value};
 
 use crate::domain::models::{MetricasDashboard, TerritorioDashboardRow};
@@ -109,6 +110,28 @@ pub async fn metricas(State(state): State<AppState>) -> Result<Json<MetricasDash
     .fetch_one(&state.pool)
     .await?;
 
+    let tendencia_rows: Vec<(NaiveDate, i64)> = sqlx::query_as(
+        r#"
+        SELECT
+            (date_trunc('week', p.fecha_radicado AT TIME ZONE 'UTC'))::date AS semana,
+            COUNT(*)::bigint AS total
+        FROM pqrs p
+        GROUP BY 1
+        ORDER BY 1 DESC
+        LIMIT 8
+        "#,
+    )
+    .fetch_all(&state.pool)
+    .await
+    .unwrap_or_default();
+
+    let tendencia_vals: Vec<Value> = tendencia_rows
+        .into_iter()
+        .rev()
+        .map(|(semana, total)| json!({ "semana": semana.to_string(), "total": total }))
+        .collect();
+    let tendencia_semanal = Value::Array(tendencia_vals);
+
     Ok(Json(MetricasDashboard {
         total_pqrs: row.0,
         pendientes: row.1,
@@ -121,5 +144,6 @@ pub async fn metricas(State(state): State<AppState>) -> Result<Json<MetricasDash
         por_riesgo: por_nivel_val.clone(),
         por_nivel_riesgo: por_nivel_val,
         tasa_clasificacion_correcta: tasa,
+        tendencia_semanal,
     }))
 }

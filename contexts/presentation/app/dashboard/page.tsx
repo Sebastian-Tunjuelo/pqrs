@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 
+import { DashboardExtraCharts } from "@/components/DashboardExtraCharts";
 import { MetricCards } from "@/components/MetricCards";
 import { RiesgoBarChart } from "@/components/RiesgoBarChart";
 import { apiGetServer } from "@/lib/api";
@@ -63,6 +64,7 @@ export default async function DashboardPage() {
         <DashboardMap countsByCodigo={countsByCodigo} estadosByCodigo={estadosByCodigo} />
         <RiesgoBarChart porNivel={metricas.por_riesgo ?? metricas.por_nivel_riesgo} />
       </div>
+      <DashboardExtraCharts metricas={metricas} />
     </main>
   );
 }

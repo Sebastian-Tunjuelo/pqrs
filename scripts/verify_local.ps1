@@ -41,6 +41,9 @@ if (-not $ready) {
     Write-Error "Postgres no respondió. Revise Docker Desktop y volver a ejecutar."
 }
 
+Write-Step "2b. Limpiar stream Redis pqrs.summary.jobs (UUIDs viejos tras purge demo)"
+docker compose -f (Join-Path $Root "docker-compose.yml") exec -T redis redis-cli DEL pqrs.summary.jobs 2>$null | Out-Null
+
 Write-Step "3. Instalar warehouse + Alembic"
 & $global:PqrsPythonExe -m pip install -q -e (Join-Path $Root "contexts\warehouse")
 

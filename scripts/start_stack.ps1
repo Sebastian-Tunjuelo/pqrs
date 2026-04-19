@@ -1,9 +1,10 @@
 <#
 .SYNOPSIS
-    Levanta Docker (Postgres, Redis, Ollama) y abre dos ventanas: API Rust + Next.js dev.
+    Levanta Docker (Postgres, Redis, Ollama) y abre ventanas: worker síntesis (Redis/Ollama) + API Rust + Next.js dev.
 
 .DESCRIPTION
     El navegador en http://localhost:3000 queda en blanco si Next no está corriendo.
+    El worker `summary_redis_worker` es necesario para la pestaña Resumen IA (detalle PQRS).
     Este script no sustituye la primera carga de datos: si la API falla por tablas vacías,
     ejecute una vez (PowerShell, raíz del repo):
 
@@ -48,7 +49,14 @@ if (-not $ready) {
     exit 1
 }
 
-Write-Step "3/3 Abriendo API (cargo) y Next (npm) en ventanas nuevas"
+Write-Step "3/4 Abriendo worker de síntesis (Redis + Ollama)"
+$workerPs1 = Join-Path $PSScriptRoot "_run_summary_worker.ps1"
+Start-Process powershell -WorkingDirectory $Root -ArgumentList @(
+    "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $workerPs1
+)
+Start-Sleep -Milliseconds 600
+
+Write-Step "4/4 Abriendo API (cargo) y Next (npm) en ventanas nuevas"
 $apiPs1 = Join-Path $PSScriptRoot "_run_api.ps1"
 $nextPs1 = Join-Path $PSScriptRoot "_run_next.ps1"
 
@@ -62,6 +70,7 @@ Start-Process powershell -WorkingDirectory $Root -ArgumentList @(
 
 Write-Host ""
 Write-Host "Listo." -ForegroundColor Green
+Write-Host "  • Ventana worker: consume `pqrs.summary.jobs` (necesaria para pestaña Resumen IA en detalle PQRS)." -ForegroundColor Gray
 Write-Host "  • Espere a que en la ventana de la API aparezca 'listening' (la primera vez cargo compila varios minutos)." -ForegroundColor Gray
 Write-Host "  • En la ventana de Next verá 'Ready' y entonces recargue http://localhost:3000 en el navegador." -ForegroundColor Gray
 Write-Host "  • Si la API falla por esquema/tablas: ejecute una vez  .\scripts\verify_local.ps1  y reinicie la ventana de la API." -ForegroundColor Yellow

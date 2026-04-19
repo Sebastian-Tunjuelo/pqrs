@@ -8,6 +8,8 @@ RUN apt-get update \
     git \
     build-essential \
     postgresql-server-dev-16 \
+    clang-13 \
+    llvm-13 \
   && cd /tmp \
   && git clone --depth 1 --branch v0.7.4 https://github.com/pgvector/pgvector.git \
   && cd pgvector \
@@ -15,7 +17,7 @@ RUN apt-get update \
   && make install \
   && cd / \
   && rm -rf /tmp/pgvector \
-  && apt-get purge -y git build-essential postgresql-server-dev-16 \
+  && apt-get purge -y git build-essential postgresql-server-dev-16 clang-13 llvm-13 \
   && apt-get autoremove -y \
   && rm -rf /var/lib/apt/lists/*
 

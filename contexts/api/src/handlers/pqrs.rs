@@ -58,11 +58,18 @@ pub struct PqrsListFilters {
     pub page: u32,
     #[serde(default = "default_per_page")]
     pub per_page: u32,
+    /// `validation_status` (enum en Postgres).
     pub estado: Option<String>,
     pub secretaria: Option<String>,
     pub riesgo: Option<String>,
     pub fecha_desde: Option<NaiveDate>,
     pub fecha_hasta: Option<NaiveDate>,
+    /// P, Q, R, S o D.
+    pub tipo: Option<String>,
+    /// `estado_clasificacion` (ACEPTADA, RECHAZADA_*).
+    pub estado_clasificacion: Option<String>,
+    /// `estado_gestion` (PENDIENTE, EN_TRAMITE, …).
+    pub estado_gestion: Option<String>,
 }
 
 fn parse_validation_status(raw: &str) -> Result<&'static str, ApiError> {
@@ -95,6 +102,40 @@ fn parse_secretaria_codigo(raw: &str) -> Result<String, ApiError> {
     Ok(c)
 }
 
+fn parse_tipo_pqrs(raw: &str) -> Result<&'static str, ApiError> {
+    match raw.trim().to_ascii_uppercase().as_str() {
+        "P" => Ok("P"),
+        "Q" => Ok("Q"),
+        "R" => Ok("R"),
+        "S" => Ok("S"),
+        "D" => Ok("D"),
+        _ => Err(ApiError::bad_request("tipo debe ser P, Q, R, S o D")),
+    }
+}
+
+fn parse_estado_clasificacion(raw: &str) -> Result<&'static str, ApiError> {
+    match raw.trim() {
+        "ACEPTADA" => Ok("ACEPTADA"),
+        "RECHAZADA_OFENSIVO" => Ok("RECHAZADA_OFENSIVO"),
+        "RECHAZADA_NO_ENTENDIBLE" => Ok("RECHAZADA_NO_ENTENDIBLE"),
+        _ => Err(ApiError::bad_request(
+            "estado_clasificacion inválido (ACEPTADA | RECHAZADA_OFENSIVO | RECHAZADA_NO_ENTENDIBLE)",
+        )),
+    }
+}
+
+fn parse_estado_gestion(raw: &str) -> Result<&'static str, ApiError> {
+    match raw.trim().to_ascii_uppercase().as_str() {
+        "PENDIENTE" => Ok("PENDIENTE"),
+        "EN_TRAMITE" => Ok("EN_TRAMITE"),
+        "RESPONDIDA" => Ok("RESPONDIDA"),
+        "VENCIDA" => Ok("VENCIDA"),
+        _ => Err(ApiError::bad_request(
+            "estado_gestion inválido (PENDIENTE | EN_TRAMITE | RESPONDIDA | VENCIDA)",
+        )),
+    }
+}
+
 fn build_pqrs_list_where(f: &PqrsListFilters) -> Result<String, ApiError> {
     let mut parts = vec!["TRUE".to_string()];
     if let Some(ref e) = f.estado {
@@ -116,6 +157,18 @@ fn build_pqrs_list_where(f: &PqrsListFilters) -> Result<String, ApiError> {
     }
     if let Some(d) = f.fecha_hasta {
         parts.push(format!("p.fecha_radicado::date <= '{}'", d));
+    }
+    if let Some(ref t) = f.tipo {
+        let tv = parse_tipo_pqrs(t)?;
+        parts.push(format!("p.tipo = '{tv}'"));
+    }
+    if let Some(ref ec) = f.estado_clasificacion {
+        let v = parse_estado_clasificacion(ec)?;
+        parts.push(format!("p.estado_clasificacion = '{v}'"));
+    }
+    if let Some(ref eg) = f.estado_gestion {
+        let v = parse_estado_gestion(eg)?;
+        parts.push(format!("p.estado_gestion = '{v}'"));
     }
     Ok(parts.join(" AND "))
 }
@@ -307,7 +360,8 @@ pub async fn get_pqrs_summary(
 
     let key = format!("pqrs:summary:result:{corr}");
     let mut saw_ok = false;
-    for _ in 0..300u32 {
+    // Ollama en CPU puede tardar >45 s; ~120 s da margen al worker de síntesis.
+    for _ in 0..800u32 {
         let val: Option<String> = redis_cm
             .get(&key)
             .await

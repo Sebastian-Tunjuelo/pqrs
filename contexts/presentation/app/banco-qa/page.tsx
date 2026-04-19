@@ -1,4 +1,5 @@
 import { BancoQaSearch } from "@/components/BancoQaSearch";
+import { BancoQaSemanticSearch } from "@/components/BancoQaSemanticSearch";
 import { apiGetServer } from "@/lib/api";
 import type { BancoQaRow } from "@/lib/types";
 
@@ -30,9 +31,13 @@ export default async function BancoQaPage() {
           <code className="rounded bg-slate-100 px-1 text-xs">POST /api/v1/banco-qa/buscar</code>.
         </p>
       </div>
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-base font-semibold text-slate-800">Buscar</h2>
+      <section className="rounded-card border border-neutral-100 bg-white p-6 shadow-card">
+        <h2 className="mb-4 text-base font-semibold text-neutral-900">Búsqueda por texto</h2>
         <BancoQaSearch />
+      </section>
+      <section className="rounded-card border border-neutral-100 bg-white p-6 shadow-card">
+        <h2 className="mb-4 text-base font-semibold text-neutral-900">Búsqueda semántica (top 5)</h2>
+        <BancoQaSemanticSearch />
       </section>
       <section>
         <h2 className="mb-3 text-base font-semibold text-slate-800">Catálogo ({rows.length})</h2>

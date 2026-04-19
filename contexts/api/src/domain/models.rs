@@ -88,6 +88,8 @@ pub struct MetricasDashboard {
     /// Alias histórico del frontend (mismo contenido que `por_riesgo`).
     pub por_nivel_riesgo: serde_json::Value,
     pub tasa_clasificacion_correcta: Option<f64>,
+    /// Últimas 8 semanas: `[{"semana":"YYYY-MM-DD","total": N}, ...]`.
+    pub tendencia_semanal: serde_json::Value,
 }
 
 #[derive(Debug, Serialize, FromRow)]
