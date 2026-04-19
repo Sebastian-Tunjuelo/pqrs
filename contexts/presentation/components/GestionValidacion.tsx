@@ -93,11 +93,11 @@ export function GestionValidacion({ initial }: Props) {
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {items.map((it) => (
-            <button
+            <div
               key={it.id}
-              type="button"
+              role="presentation"
               onClick={() => onSelect(it)}
-              className={`text-left ${selected?.id === it.id ? "ring-2 ring-primary/40" : ""}`}
+              className={`cursor-pointer text-left ${selected?.id === it.id ? "ring-2 ring-primary/40 ring-offset-2 rounded-card" : ""}`}
             >
               <PqrsCard
                 item={it}
@@ -105,7 +105,7 @@ export function GestionValidacion({ initial }: Props) {
                 onValidate={() => onSelect(it)}
                 onCorrect={() => onSelect(it)}
               />
-            </button>
+            </div>
           ))}
         </div>
       </div>

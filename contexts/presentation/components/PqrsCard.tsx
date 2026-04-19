@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import type { PqrsListItem } from "@/lib/types";
+
+type DiasBar = { label: string; pct: number; urgent: boolean };
 
 function tipoBadge(t: string | null | undefined) {
   const v = (t || "?").toUpperCase();
@@ -27,7 +30,7 @@ function riesgoBadge(r: string | null | undefined) {
   return map[v] ?? "bg-neutral-200 text-neutral-900";
 }
 
-function diasBar(fechaLimite: string | null) {
+function diasBar(fechaLimite: string | null): DiasBar {
   if (!fechaLimite) return { label: "Sin fecha límite", pct: 0, urgent: false };
   const lim = new Date(fechaLimite + "T12:00:00");
   const now = new Date();
@@ -49,7 +52,14 @@ export function PqrsCard({ item, lead, secretariaLabel, onValidate, onCorrect }:
   const conf = item.confianza_clasificacion;
   const confPct =
     conf != null ? `${Math.round(Number(conf) * 100)}%` : "—";
-  const bar = diasBar(item.fecha_limite);
+  const [bar, setBar] = useState<DiasBar>(() =>
+    item.fecha_limite
+      ? { label: "Plazo (calculando…)", pct: 0, urgent: false }
+      : { label: "Sin fecha límite", pct: 0, urgent: false }
+  );
+  useEffect(() => {
+    setBar(diasBar(item.fecha_limite));
+  }, [item.fecha_limite]);
   const ext = item.id_externo || item.id.slice(0, 8);
 
   return (
@@ -97,20 +107,27 @@ export function PqrsCard({ item, lead, secretariaLabel, onValidate, onCorrect }:
       <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={onValidate}
+          onClick={(e) => {
+            e.stopPropagation();
+            onValidate?.();
+          }}
           className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
         >
           Validar ✓
         </button>
         <button
           type="button"
-          onClick={onCorrect}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCorrect?.();
+          }}
           className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-900 hover:bg-neutral-50"
         >
           Corregir ✏
         </button>
         <Link
           href={`/pqrs/${item.id}`}
+          onClick={(e) => e.stopPropagation()}
           className="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary underline-offset-2 hover:underline"
         >
           Ver detalle →
