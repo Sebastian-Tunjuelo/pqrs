@@ -76,11 +76,18 @@ pub struct TerritorioDashboardRow {
 #[derive(Debug, Serialize)]
 pub struct MetricasDashboard {
     pub total_pqrs: i64,
+    /// Pendientes de gestión (mismo significado que `pendientes_gestion`).
+    pub pendientes: i64,
     pub pendientes_gestion: i64,
     pub en_tramite: i64,
     pub respondidas: i64,
     pub vencidas: i64,
+    pub promedio_dias_respuesta: Option<f64>,
+    pub por_tipo: serde_json::Value,
+    pub por_riesgo: serde_json::Value,
+    /// Alias histórico del frontend (mismo contenido que `por_riesgo`).
     pub por_nivel_riesgo: serde_json::Value,
+    pub tasa_clasificacion_correcta: Option<f64>,
 }
 
 #[derive(Debug, Serialize, FromRow)]

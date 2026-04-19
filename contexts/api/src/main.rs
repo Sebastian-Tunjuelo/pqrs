@@ -1,9 +1,11 @@
 use std::net::SocketAddr;
 
+use axum::http::header::{HeaderValue, AUTHORIZATION, CONTENT_TYPE};
+use axum::http::{HeaderName, Method};
 use axum::Router;
 use redis::aio::ConnectionManager;
 use sqlx::postgres::PgPoolOptions;
-use tower_http::cors::CorsLayer;
+use tower_http::cors::{AllowOrigin, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
@@ -66,10 +68,30 @@ async fn main() {
         embedding_url,
     };
 
+    let origins = [
+        HeaderValue::from_static("http://localhost:3000"),
+        HeaderValue::from_static("http://127.0.0.1:3000"),
+    ];
+    let cors = CorsLayer::new()
+        .allow_origin(AllowOrigin::list(origins))
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PATCH,
+            Method::PUT,
+            Method::DELETE,
+            Method::OPTIONS,
+        ])
+        .allow_headers([
+            HeaderName::from_static("content-type"),
+            AUTHORIZATION,
+            CONTENT_TYPE,
+        ]);
+
     let app = Router::new()
         .nest("/api/v1", api_v1_router(state))
         .layer(TraceLayer::new_for_http())
-        .layer(CorsLayer::permissive());
+        .layer(cors);
 
     let port: u16 = std::env::var("PORT")
         .ok()

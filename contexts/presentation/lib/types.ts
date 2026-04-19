@@ -73,11 +73,16 @@ export type AssistOllamaReply = {
 
 export type MetricasDashboard = {
   total_pqrs: number;
+  pendientes: number;
   pendientes_gestion: number;
   en_tramite: number;
   respondidas: number;
   vencidas: number;
+  promedio_dias_respuesta?: number | null;
+  por_tipo: Record<string, number>;
+  por_riesgo: Record<string, number>;
   por_nivel_riesgo: Record<string, number>;
+  tasa_clasificacion_correcta?: number | null;
 };
 
 export type SecretariaRow = {

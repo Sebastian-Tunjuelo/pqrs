@@ -3,7 +3,11 @@ import type { MetricasDashboard } from "@/lib/types";
 export function MetricCards({ data }: { data: MetricasDashboard }) {
   const cards = [
     { label: "Total PQRS", value: data.total_pqrs, tone: "bg-slate-800 text-white" },
-    { label: "Pendientes", value: data.pendientes_gestion, tone: "bg-amber-500 text-white" },
+    {
+      label: "Pendientes",
+      value: data.pendientes ?? data.pendientes_gestion,
+      tone: "bg-amber-500 text-white",
+    },
     { label: "En trámite", value: data.en_tramite, tone: "bg-brand-600 text-white" },
     { label: "Respondidas", value: data.respondidas, tone: "bg-emerald-600 text-white" },
     { label: "Vencidas", value: data.vencidas, tone: "bg-rose-600 text-white" }

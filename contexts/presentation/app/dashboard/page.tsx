@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       <MetricCards data={metricas} />
       <div className="grid gap-8 lg:grid-cols-2">
         <DashboardMap countsByCodigo={countsByCodigo} estadosByCodigo={estadosByCodigo} />
-        <RiesgoBarChart porNivel={metricas.por_nivel_riesgo} />
+        <RiesgoBarChart porNivel={metricas.por_riesgo ?? metricas.por_nivel_riesgo} />
       </div>
     </main>
   );

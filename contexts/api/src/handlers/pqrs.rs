@@ -1,9 +1,12 @@
 use std::time::Duration;
 
+use axum::http::{HeaderMap, HeaderName, HeaderValue};
+use axum::response::{IntoResponse, Response};
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
+use chrono::NaiveDate;
 use redis::AsyncCommands;
 use uuid::Uuid;
 
@@ -47,6 +50,74 @@ fn default_page() -> u32 {
 
 fn default_per_page() -> u32 {
     20
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct PqrsListFilters {
+    #[serde(default = "default_page")]
+    pub page: u32,
+    #[serde(default = "default_per_page")]
+    pub per_page: u32,
+    pub estado: Option<String>,
+    pub secretaria: Option<String>,
+    pub riesgo: Option<String>,
+    pub fecha_desde: Option<NaiveDate>,
+    pub fecha_hasta: Option<NaiveDate>,
+}
+
+fn parse_validation_status(raw: &str) -> Result<&'static str, ApiError> {
+    match raw.trim() {
+        "PENDING_VALIDATION" => Ok("PENDING_VALIDATION"),
+        "VALIDATED" => Ok("VALIDATED"),
+        "REJECTED_BY_OFFICER" => Ok("REJECTED_BY_OFFICER"),
+        "CORRECTION_REQUESTED" => Ok("CORRECTION_REQUESTED"),
+        _ => Err(ApiError::bad_request(
+            "estado inválido: use PENDING_VALIDATION | VALIDATED | REJECTED_BY_OFFICER | CORRECTION_REQUESTED",
+        )),
+    }
+}
+
+fn parse_riesgo(raw: &str) -> Result<&'static str, ApiError> {
+    match raw.trim().to_ascii_uppercase().as_str() {
+        "CRITICO" => Ok("CRITICO"),
+        "ALTO" => Ok("ALTO"),
+        "MEDIO" => Ok("MEDIO"),
+        "BAJO" => Ok("BAJO"),
+        _ => Err(ApiError::bad_request("riesgo inválido")),
+    }
+}
+
+fn parse_secretaria_codigo(raw: &str) -> Result<String, ApiError> {
+    let c = raw.trim().to_uppercase();
+    if !(2..=10).contains(&c.len()) || !c.chars().all(|x| x.is_ascii_alphanumeric()) {
+        return Err(ApiError::bad_request("secretaria: código inválido"));
+    }
+    Ok(c)
+}
+
+fn build_pqrs_list_where(f: &PqrsListFilters) -> Result<String, ApiError> {
+    let mut parts = vec!["TRUE".to_string()];
+    if let Some(ref e) = f.estado {
+        let v = parse_validation_status(e)?;
+        parts.push(format!("p.validation_status = '{v}'::validation_status"));
+    }
+    if let Some(ref s) = f.secretaria {
+        let c = parse_secretaria_codigo(s)?;
+        parts.push(format!(
+            "EXISTS (SELECT 1 FROM pqrs_secretaria ps WHERE ps.pqrs_id = p.id AND ps.secretaria_codigo = '{c}')"
+        ));
+    }
+    if let Some(ref r) = f.riesgo {
+        let rv = parse_riesgo(r)?;
+        parts.push(format!("p.nivel_riesgo = '{rv}'"));
+    }
+    if let Some(d) = f.fecha_desde {
+        parts.push(format!("p.fecha_radicado::date >= '{}'", d));
+    }
+    if let Some(d) = f.fecha_hasta {
+        parts.push(format!("p.fecha_radicado::date <= '{}'", d));
+    }
+    Ok(parts.join(" AND "))
 }
 
 const PQRS_DETAIL_SQL: &str = r#"
@@ -173,17 +244,22 @@ async fn pqrs_paginated(
 
 pub async fn list_pqrs(
     State(state): State<AppState>,
-    Query(q): Query<PageQuery>,
-) -> Result<Json<Paginated<PqrsListItem>>, ApiError> {
+    Query(q): Query<PqrsListFilters>,
+) -> Result<Response, ApiError> {
+    let where_sql = format!("WHERE {}", build_pqrs_list_where(&q)?);
     let data = pqrs_paginated(
         &state.pool,
-        "",
+        &where_sql,
         "ORDER BY p.fecha_radicado DESC",
         q.page,
         q.per_page,
     )
     .await?;
-    Ok(Json(data))
+    let mut headers = HeaderMap::new();
+    if let Ok(hv) = HeaderValue::from_str(&data.total.to_string()) {
+        headers.insert(HeaderName::from_static("x-total-count"), hv);
+    }
+    Ok((headers, Json(data)).into_response())
 }
 
 pub async fn get_pqrs(
