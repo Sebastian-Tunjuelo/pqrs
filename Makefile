@@ -29,6 +29,7 @@ lint:
 demo: up
 	@echo "=== Demo: 200 PQRS sintéticas (Postgres migrado + dim_secretaria + dim_territorio) ==="
 	@$(PYTHON) -c "import psycopg" 2>/dev/null || $(PYTHON) -m pip install -q -r scripts/requirements-demo.txt
+	@$(PYTHON) -c "import prioritization" 2>/dev/null || $(PYTHON) -m pip install -q -e ./contexts/prioritization
 	@DATABASE_URL=$${DATABASE_URL:-postgresql://pqrs:pqrs@localhost:5433/pqrs?sslmode=disable} $(PYTHON) scripts/demo_seed_pqrs.py --purge
 
 demo-full: demo pull-model
