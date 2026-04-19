@@ -7,7 +7,6 @@ const links = [
   { href: "/gestion", label: "Gestión" },
   { href: "/historial", label: "Historial" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/banco-qa", label: "Banco Q&A" },
   { href: "/asistente", label: "Asistente" }
 ] as const;
 

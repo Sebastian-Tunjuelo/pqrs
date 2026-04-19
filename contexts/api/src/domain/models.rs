@@ -17,6 +17,9 @@ pub struct PqrsListItem {
     pub territorio_id: Option<i32>,
     pub confianza_clasificacion: Option<f64>,
     pub validation_status: String,
+    /// Secretaría líder o la de mayor score (`pqrs_secretaria` + `dim_secretaria`).
+    pub secretaria_codigo: Option<String>,
+    pub secretaria_nombre: Option<String>,
 }
 
 #[derive(Debug, Serialize, FromRow)]
@@ -90,32 +93,6 @@ pub struct MetricasDashboard {
     pub tasa_clasificacion_correcta: Option<f64>,
     /// Últimas 8 semanas: `[{"semana":"YYYY-MM-DD","total": N}, ...]`.
     pub tendencia_semanal: serde_json::Value,
-}
-
-#[derive(Debug, Serialize, FromRow)]
-pub struct BancoQaRow {
-    pub id: i32,
-    pub pregunta: String,
-    pub respuesta: String,
-    pub secretaria_codigo: Option<String>,
-    pub tags: Option<Vec<String>>,
-    pub veces_consultada: Option<i32>,
-}
-
-#[derive(Debug, Serialize, FromRow)]
-pub struct BancoQaSemanticRow {
-    pub id: i32,
-    pub pregunta: String,
-    pub respuesta: String,
-    pub secretaria_codigo: Option<String>,
-    pub tags: Option<Vec<String>>,
-    pub veces_consultada: Option<i32>,
-    pub similarity: f64,
-}
-
-#[derive(Debug, serde::Deserialize)]
-pub struct BancoQaBuscarBody {
-    pub query: String,
 }
 
 #[derive(Debug, Serialize)]

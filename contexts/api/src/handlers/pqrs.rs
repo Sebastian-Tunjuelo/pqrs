@@ -260,8 +260,18 @@ SELECT
     p.nivel_riesgo,
     p.territorio_id,
     p.confianza_clasificacion::float8 AS confianza_clasificacion,
-    p.validation_status::text AS validation_status
+    p.validation_status::text AS validation_status,
+    lead_sec.secretaria_codigo,
+    lead_sec.secretaria_nombre
 FROM pqrs p
+LEFT JOIN LATERAL (
+    SELECT ps.secretaria_codigo, d.nombre AS secretaria_nombre
+    FROM pqrs_secretaria ps
+    INNER JOIN dim_secretaria d ON d.codigo = ps.secretaria_codigo
+    WHERE ps.pqrs_id = p.id
+    ORDER BY ps.es_lider DESC NULLS LAST, ps.score DESC NULLS LAST
+    LIMIT 1
+) lead_sec ON true
 "#;
 
 async fn pqrs_paginated(

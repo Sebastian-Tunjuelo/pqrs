@@ -30,7 +30,7 @@
 
 **Consecuencias:** Más pasos en UX y API; cumplimiento explícito del relato legal para el jurado.
 
-## Hito 4 — Datos: banco Q&A y semántica
+## Hito 4 — Datos: banco Q&A y semántica *(retirado del producto; migración 006 elimina `banco_qa`)*
 
 **Contexto:** Recuperar precedentes similares no se resolvía con `ILIKE` alone.
 

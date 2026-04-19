@@ -20,17 +20,6 @@ def test_alertas_list(api_url: str) -> None:
 
 
 @pytest.mark.e2e
-def test_banco_qa_semantic_requires_embedding_url(api_url: str) -> None:
-    r = httpx.post(
-        f"{api_url}/api/v1/banco-qa/buscar-semantico",
-        json={"query": "plazos ley 1755"},
-        timeout=15.0,
-    )
-    # Sin EMBEDDING_URL en la API suele ser 400; con servicio y embeddings es 200.
-    assert r.status_code in (200, 400, 502)
-
-
-@pytest.mark.e2e
 def test_validate_patch_roundtrip(api_url: str) -> None:
     r0 = httpx.get(f"{api_url}/api/v1/pqrs/pending-validation?page=1&per_page=1", timeout=15.0)
     assert r0.status_code == 200

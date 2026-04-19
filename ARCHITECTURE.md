@@ -13,7 +13,7 @@ Sistema de gestión de PQRS (Peticiones, Quejas, Reclamos, Sugerencias) para la 
 2. Pipeline multi-agente con Ollama `llama3.2:3b` + LangChain + LangGraph
 3. Data warehouse limpio (DuckDB analítica + PostgreSQL OLTP)
 4. Backend Rust (Axum) — API REST
-5. Frontend Next.js con 4 vistas: historial, gestión, dashboard geoespacial, banco Q&A
+5. Frontend Next.js con vistas: historial, gestión, dashboard geoespacial, asistente
 6. Sistema de recomendación: PQRS → secretaría(s) competente(s)
 
 **Restricciones**: TODO gratuito. Sin servicios pagos. Sin API keys de pago.
@@ -91,7 +91,7 @@ pqrs-medellin/
 │       │   ├── historial/      # Vista 1
 │       │   ├── gestion/        # Vista 2
 │       │   ├── dashboard/      # Vista 3: mapas comunas/corregimientos
-│       │   └── banco-qa/       # Vista 4
+│       │   └── asistente/      # Vista asistente Ollama
 │       ├── components/
 │       └── lib/
 ```
@@ -211,8 +211,6 @@ Debe incluir, como mínimo:
 - `pqrs`
 - `pqrs_secretaria` (N:M)
 - `pqrs_historial`
-- `banco_qa` (opcional `pgvector`)
-
 Índices por estado, riesgo, fecha límite, territorio y geoespacial.
 
 ### 9.2 DuckDB (OLAP)
@@ -237,19 +235,17 @@ Endpoints mínimos:
 - `GET /api/v1/dashboard/metricas`
 - `GET /api/v1/secretarias`
 - `GET /api/v1/secretarias/{codigo}/pqrs`
-- `GET /api/v1/banco-qa`
-- `POST /api/v1/banco-qa/buscar`
 - `GET /api/v1/health`
 
 ---
 
-## 11. FRONTEND — 4 VISTAS (+BONUS)
+## 11. FRONTEND — VISTAS
 
 - `/historial`
 - `/gestion`
 - `/dashboard` (Leaflet + GeoJSON comunas/corregimientos)
-- `/banco-qa`
-- `/recomendador` (bonus)
+- `/asistente`
+- `/recomendador` (bonus, si aplica)
 
 ---
 
@@ -268,9 +264,8 @@ Crear cards en este orden, una branch por card:
 9. `orchestration-langgraph` → `feat/orchestration`
 10. `backend-rust-axum` → `feat/backend-rust`
 11. `frontend-nextjs` → `feat/frontend`
-12. `banco-qa-builder` → `feat/banco-qa`
-13. `e2e-tests-and-demo-seed` → `feat/e2e`
-14. `docs-readme-deploy` → `feat/docs`
+12. `e2e-tests-and-demo-seed` → `feat/e2e`
+13. `docs-readme-deploy` → `feat/docs`
 
 Respetar dependencias entre cards según la definición original.
 

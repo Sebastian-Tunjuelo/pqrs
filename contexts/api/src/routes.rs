@@ -3,7 +3,7 @@ use axum::{
     Router,
 };
 
-use crate::handlers::{alertas, assist, banco_qa, dashboard, health, pqrs, secretarias};
+use crate::handlers::{alertas, assist, dashboard, health, pqrs, secretarias};
 use crate::state::AppState;
 
 /// Rutas bajo prefijo `/api/v1`.
@@ -35,12 +35,6 @@ pub fn api_v1_router(state: AppState) -> Router {
         .route(
             "/secretarias/:codigo/pqrs",
             get(secretarias::pqrs_por_secretaria),
-        )
-        .route("/banco-qa", get(banco_qa::list_banco_qa))
-        .route("/banco-qa/buscar", post(banco_qa::buscar_banco_qa))
-        .route(
-            "/banco-qa/buscar-semantico",
-            post(banco_qa::buscar_semantico),
         )
         .with_state(state)
 }

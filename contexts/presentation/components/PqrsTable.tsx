@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { tipoConSignificado } from "@/lib/tipoPqrs";
 import type { PqrsListItem } from "@/lib/types";
 
 function fmtDate(iso: string | null): string {
@@ -64,7 +65,9 @@ export function PqrsTable({
           <tbody className="divide-y divide-slate-100">
             {items.map((row) => (
               <tr key={row.id} className="hover:bg-slate-50/80">
-                <td className="whitespace-nowrap px-4 py-2 font-mono text-xs">{row.tipo ?? "—"}</td>
+                <td className="max-w-[10rem] whitespace-normal px-4 py-2 text-xs leading-snug">
+                  {tipoConSignificado(row.tipo)}
+                </td>
                 <td className="max-w-md px-4 py-2 text-slate-700">
                   <Link
                     href={`/pqrs/${row.id}`}

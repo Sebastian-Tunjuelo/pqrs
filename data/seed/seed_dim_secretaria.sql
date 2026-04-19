@@ -20,8 +20,8 @@ INSERT INTO dim_secretaria (codigo, nombre, activa) VALUES
 ('SNR', 'Secretaría No Violencia', true),
 ('STU', 'Secretaría de Turismo', true),
 ('DAP', 'Departamento Administrativo de Planeación', true),
-('DAGRD', 'Dpto. Admvo. Gestión del Riesgo de Desastres', true),
-('DAS', 'Dpto. Admvo. de Seguridad y Justicia', true),
+('DAGRD', 'Departamento Administrativo de Gestión del Riesgo de Desastres', true),
+('DAS', 'Departamento Administrativo de Seguridad y Justicia', true),
 ('SAG', 'Secretaría de Desarrollo Agropecuario', true),
 ('SPF', 'Secretaría de Participación Ciudadana', true),
 ('SEJ', 'Secretaría de Educación para el Trabajo', true)

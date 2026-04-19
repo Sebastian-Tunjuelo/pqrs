@@ -15,8 +15,6 @@ pull-model:
 
 seed:
 	@echo "Dim secretaría / territorio: data/seed/*.sql + migraciones warehouse (Alembic)."
-	@echo "Banco Q&A: pip install -e ./contexts/banco_qa && desde la raíz del repo:"
-	@echo "  DATABASE_URL=postgresql://pqrs:pqrs@localhost:5433/pqrs?sslmode=disable python -m banco_qa seed"
 
 test:
 	@echo "E2E API: levante pqrs-api (por defecto http://127.0.0.1:8080; use E2E_API_URL si cambia)."

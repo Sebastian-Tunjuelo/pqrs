@@ -6,7 +6,7 @@ Este archivo existe para que **cualquier asistente de código** entienda en minu
 
 ## Qué es el proyecto
 
-Monorepo **DDD** para gestión de **PQRS** (peticiones, quejas, reclamos, sugerencias) alineado a flujos tipo Alcaldía de Medellín / Ley 1755: **ingestión**, **clasificación**, **priorización**, **ruteo**, **warehouse** (Postgres + Alembic, DuckDB opcional), **API REST en Rust (Axum + SQLx)**, **frontend Next.js 14 (App Router)**, **orquestación LangGraph** con Redis, **banco Q&A**, y asistente vía **Ollama**.
+Monorepo **DDD** para gestión de **PQRS** (peticiones, quejas, reclamos, sugerencias) alineado a flujos tipo Alcaldía de Medellín / Ley 1755: **ingestión**, **clasificación**, **priorización**, **ruteo**, **warehouse** (Postgres + Alembic, DuckDB opcional), **API REST en Rust (Axum + SQLx)**, **frontend Next.js 14 (App Router)**, **orquestación LangGraph** con Redis, y asistente vía **Ollama**.
 
 ---
 
@@ -47,7 +47,7 @@ docker compose up -d
 
 Servicios: `postgres` (PostGIS), `redis`, `ollama`.
 
-### 2. Esquema Postgres + dimensiones + demo + banco Q&A
+### 2. Esquema Postgres + dimensiones + demo
 
 **PowerShell**, raíz del repo:
 
@@ -55,7 +55,7 @@ Servicios: `postgres` (PostGIS), `redis`, `ollama`.
 .\scripts\verify_local.ps1
 ```
 
-Hace: espera Postgres → `pip install -e contexts/warehouse` → **Alembic `upgrade head`** → SQL `data/seed/seed_dim_secretaria.sql`, `seed_dim_territorio.sql`, `seed_banco_qa.sql` → **~200 PQRS demo** (`scripts/demo_seed_pqrs.py --purge`).  
+Hace: espera Postgres → `pip install -e contexts/warehouse` → **Alembic `upgrade head`** → SQL `data/seed/seed_dim_secretaria.sql`, `seed_dim_territorio.sql` → **~200 PQRS demo** (`scripts/demo_seed_pqrs.py --purge`).  
 **No arranca** la API ni Next; solo deja la BD lista.
 
 ### 3. Worker de síntesis (Resumen IA en detalle PQRS)
@@ -122,9 +122,9 @@ Si el usuario pide “correr todo” **por comandos explícitos**: Docker + paso
 | Ruta | Rol |
 |------|-----|
 | `contexts/api/` | API Axum, rutas `/api/v1/...`, SQLx Postgres. |
-| `contexts/presentation/` | Next.js: `/`, `/historial`, `/gestion`, `/dashboard`, `/banco-qa`, `/asistente`, `/pqrs/[id]` (detalle texto completo). |
+| `contexts/presentation/` | Next.js: `/`, `/historial`, `/gestion`, `/dashboard`, `/asistente`, `/pqrs/[id]` (detalle texto completo). |
 | `contexts/warehouse/` | Alembic + migraciones esquema `pqrs`, etc. |
-| `data/seed/*.sql` | Dimensiones y banco Q&A sembrados por `verify_local.ps1`. |
+| `data/seed/*.sql` | Dimensiones sembradas por `verify_local.ps1`. |
 | `scripts/demo_seed_pqrs.py` | PQRS sintéticas demo (arquetipos aceptada / ilegible / ofensivo). |
 | `scripts/verify_local.ps1` | Orquesta BD local (Compose + Alembic + seeds + demo). |
 | `scripts/start_stack.ps1` | Arranque Docker + ventanas worker síntesis + API + Next. |
@@ -134,7 +134,7 @@ Si el usuario pide “correr todo” **por comandos explícitos**: Docker + paso
 | `contexts/ingestion`, `classification`, `prioritization`, `routing` | Dominio Python por contexto. |
 | `orchestration/` | LangGraph + worker Redis. |
 | `e2e/` | Pytest contra API HTTP. |
-| `glosarios/` | YAML (ofensivo, riesgo, routing, banco Q&A). |
+| `glosarios/` | YAML (ofensivo, riesgo, routing). |
 
 ---
 

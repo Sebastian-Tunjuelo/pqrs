@@ -12,6 +12,9 @@ export type PqrsListItem = {
   confianza_clasificacion: number | null;
   /** Cola de validación humana (API ≥ migración 002). */
   validation_status?: string;
+  /** Secretaría líder o mayor score (`pqrs_secretaria`). */
+  secretaria_codigo?: string | null;
+  secretaria_nombre?: string | null;
 };
 
 /** Respuesta de `GET /api/v1/pqrs/:id` (API Rust). */
@@ -91,17 +94,6 @@ export type SecretariaRow = {
   nombre: string;
   activa: boolean | null;
 };
-
-export type BancoQaRow = {
-  id: number;
-  pregunta: string;
-  respuesta: string;
-  secretaria_codigo: string | null;
-  tags: string[] | null;
-  veces_consultada: number | null;
-};
-
-export type BancoQaSemanticRow = BancoQaRow & { similarity: number };
 
 export type AlertaItem = {
   id: number;

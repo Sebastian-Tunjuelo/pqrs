@@ -10,6 +10,11 @@ type Props = {
   initial: Paginated<PqrsListItem>;
 };
 
+function secretariaLabelFromItem(it: PqrsListItem): string | null {
+  const n = it.secretaria_nombre?.trim();
+  return n || null;
+}
+
 export function GestionValidacion({ initial }: Props) {
   const [items] = useState(initial.items);
   const [selected, setSelected] = useState<PqrsListItem | null>(items[0] ?? null);
@@ -102,6 +107,7 @@ export function GestionValidacion({ initial }: Props) {
               <PqrsCard
                 item={it}
                 lead={it.contenido.slice(0, 120)}
+                secretariaLabel={secretariaLabelFromItem(it)}
                 onValidate={() => onSelect(it)}
                 onCorrect={() => onSelect(it)}
               />

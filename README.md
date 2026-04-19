@@ -1,6 +1,6 @@
 # PQRS Medellín
 
-Sistema de referencia para **gestión de PQRS** (peticiones, quejas, reclamos y sugerencias), alineado a flujos tipo **Alcaldía de Medellín** y **Ley 1755 de 2015**: ingestión de datos, clasificación asistida por IA, priorización, ruteo a secretarías, almacenamiento en **PostgreSQL**, **API REST en Rust (Axum + SQLx)**, interfaz **Next.js 14**, orquestación con **LangGraph** y **Redis**, y **banco de preguntas y respuestas** para apoyo al funcionario.
+Sistema de referencia para **gestión de PQRS** (peticiones, quejas, reclamos y sugerencias), alineado a flujos tipo **Alcaldía de Medellín** y **Ley 1755 de 2015**: ingestión de datos, clasificación asistida por IA, priorización, ruteo a secretarías, almacenamiento en **PostgreSQL**, **API REST en Rust (Axum + SQLx)**, interfaz **Next.js 14**, orquestación con **LangGraph** y **Redis**, y asistente local.
 
 Este repositorio es un **monorepo por contextos acotados (DDD)**. El contrato técnico y el plan de trabajo detallado están en [`ARCHITECTURE.md`](ARCHITECTURE.md). Para asistentes de código (arranque rápido, puertos y rutas) use [`AGENTS.md`](AGENTS.md).
 
@@ -13,7 +13,6 @@ Este repositorio es un **monorepo por contextos acotados (DDD)**. El contrato t�
 | **Historial** | Consulta de PQRS con filtros y detalle. |
 | **Gestión** | Cola de validación humana de clasificación IA, alertas por plazo, tablas de respondidas y prioridad. |
 | **Dashboard** | Indicadores y visualización geoespacial (GeoJSON de comunas/corregimientos). |
-| **Banco Q&A** | Búsqueda y consulta de respuestas tipo guía (semillas en `data/seed/` y glosarios). |
 | **Asistente** | Borradores y apoyo vía **Ollama** (modelo local, sin API de pago obligatoria). |
 
 **Restricción de diseño:** el proyecto está pensado para **operación gratuita o self-hosted** (Ollama local, Postgres y Redis en Docker, sin dependencias de nube de pago en el núcleo).
@@ -57,7 +56,7 @@ En **Windows nativo**, los pasos equivalentes están en **PowerShell** (scripts 
 
 Desde la **raíz** del repositorio:
 
-1. **Infraestructura y datos de demostración** (espera Postgres, Alembic, dimensiones, banco Q&A y ~200 PQRS demo):
+1. **Infraestructura y datos de demostración** (espera Postgres, Alembic, dimensiones y ~200 PQRS demo):
 
    ```powershell
    .\scripts\verify_local.ps1
@@ -69,7 +68,7 @@ Desde la **raíz** del repositorio:
    .\scripts\_run_summary_worker.ps1
    ```
 
-3. **API Rust** (otra terminal), con `DATABASE_URL` y, si aplica, `REDIS_URL`:
+3. **API Rust** — recomendado **`.\scripts\_run_api.ps1`** (`DATABASE_URL` y `REDIS_URL`). Si arranca a mano:
 
    ```powershell
    cd contexts\api
@@ -99,7 +98,7 @@ Desde la **raíz** del repositorio:
 
    Abra **http://localhost:3000**.
 
-**Atajo:** `.\scripts\start_stack.ps1` intenta levantar Docker (si hace falta), el worker de síntesis, la API y Next en ventanas separadas.
+**Atajo:** `.\scripts\start_stack.ps1` levanta Docker (si hace falta), worker de síntesis, API y Next en ventanas separadas.
 
 ### Opción B — Linux / macOS (Make + Bash)
 
@@ -159,9 +158,8 @@ Detalles adicionales (`API_URL`, `E2E_API_URL`, `NEXT_PUBLIC_DEMO_OFFICER_NAME`,
 | `contexts/warehouse/` | Alembic, esquema y herramientas de almacén |
 | `contexts/api/` | Servicio HTTP Axum + SQLx |
 | `contexts/presentation/` | Aplicación Next.js (App Router) |
-| `contexts/banco_qa/` | Utilidades para sembrar el banco Q&A |
 | `orchestration/` | LangGraph y workers |
-| `glosarios/` | YAML de ofensividad, riesgo, routing y Q&A |
+| `glosarios/` | YAML de ofensividad, riesgo y routing |
 | `data/seed/` | SQL de dimensiones y datos de referencia |
 | `data/geojson/` | Límites territoriales para el dashboard |
 | `scripts/` | Verificación local, demo, arranque de API/Next/worker |
@@ -181,7 +179,7 @@ Detalles adicionales (`API_URL`, `E2E_API_URL`, `NEXT_PUBLIC_DEMO_OFFICER_NAME`,
 | `make demo-full` | `make demo` y descarga de modelo Ollama |
 | `make test` | Suite e2e contra la API (requiere API en ejecución) |
 | `make lint` | Ruff, Black, formateo frontend y Rust según `scripts/lint.sh` |
-| `make seed` | Recordatorio de comandos para dimensiones y banco Q&A |
+| `make seed` | Recordatorio de comandos para dimensiones |
 
 ### Pre-commit
 
@@ -224,4 +222,4 @@ Guía orientativa para entornos propios: [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Historial de entregas (tarjetas de trabajo)
 
-El proyecto se ha ido construyendo por fases (bootstrap, kernel compartido, ingestion, glosarios, clasificación, priorización, ruteo, warehouse, orquestación, API, frontend, banco Q&A, demo y e2e). El orden y los criterios globales están descritos al final de [`ARCHITECTURE.md`](ARCHITECTURE.md).
+El proyecto se ha ido construyendo por fases (bootstrap, kernel compartido, ingestion, glosarios, clasificación, priorización, ruteo, warehouse, orquestación, API, frontend, demo y e2e). El orden y los criterios globales están descritos al final de [`ARCHITECTURE.md`](ARCHITECTURE.md).

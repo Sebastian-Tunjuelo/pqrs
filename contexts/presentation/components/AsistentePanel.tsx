@@ -185,19 +185,6 @@ export function AsistentePanel({ initialTab }: { initialTab?: AssistMode }) {
           <div className="whitespace-pre-wrap text-sm text-slate-800">{out}</div>
         </section>
       )}
-
-      <p className="text-xs text-slate-500">
-        El asistente corre en <strong>Next.js</strong> (<code className="rounded bg-slate-100 px-1">/api/assist/ollama</code>
-        ): lee la PQRS en la API Rust y llama a Ollama. Configure en <code className="rounded bg-slate-100 px-1">.env.local</code>{" "}
-        del frontend:{" "}
-        <code className="rounded bg-slate-100 px-1">API_URL</code> (servidor → API Rust, ej.{" "}
-        <code className="rounded bg-slate-100 px-1">http://127.0.0.1:8080</code>),{" "}
-        <code className="rounded bg-slate-100 px-1">OLLAMA_URL</code>,{" "}
-        <code className="rounded bg-slate-100 px-1">OLLAMA_MODEL</code>.{" "}
-        <Link href="/gestion" className="text-brand-700 underline">
-          Volver a gestión
-        </Link>
-      </p>
     </div>
   );
 }

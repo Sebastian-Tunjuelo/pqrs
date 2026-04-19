@@ -11,14 +11,13 @@ import "./globals.css";
 const mobileLinks = [
   ["/gestion", "Gestión"],
   ["/historial", "Historial"],
-  ["/dashboard", "Dashboard"],
-  ["/banco-qa", "Q&A"]
+  ["/dashboard", "Dashboard"]
 ] as const;
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   title: "PQRS Medellín",
-  description: "Historial, gestión, dashboard y banco Q&A — Secretaría de Desarrollo Económico"
+  description: "Historial, gestión, dashboard y asistente — Secretaría de Desarrollo Económico"
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

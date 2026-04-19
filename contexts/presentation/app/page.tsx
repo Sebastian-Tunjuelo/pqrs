@@ -15,11 +15,6 @@ const cards = [
     href: "/dashboard",
     title: "Dashboard",
     desc: "Métricas, riesgo y mapa por comuna (Leaflet + Plotly)."
-  },
-  {
-    href: "/banco-qa",
-    title: "Banco Q&A",
-    desc: "Preguntas frecuentes y búsqueda semántica ligera."
   }
 ] as const;
 

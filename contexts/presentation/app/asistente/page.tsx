@@ -15,11 +15,7 @@ export default function AsistentePage({ searchParams }: Props) {
   return (
     <main className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Asistente Ollama</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Clasificación, riesgo, rechazo y borrador para gestión — modelo local vía Next.js (no depende de rutas
-          extra en la API Rust).
-        </p>
+        <h1 className="text-2xl font-bold text-slate-900">Asistente</h1>
       </div>
       <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <AsistentePanel initialTab={initialTab} />

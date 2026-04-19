@@ -10,12 +10,11 @@ Este documento describe **cómo preparar un entorno** (local o servidor propio).
    - `postgresql+psycopg://pqrs:pqrs@localhost:5433/pqrs` (puerto host por defecto en `docker-compose.yml`)
    - `alembic upgrade head`
 4. **Dimensiones**: ejecutar contra la misma base los SQL de `data/seed/` (`seed_dim_secretaria.sql`, `seed_dim_territorio.sql` u otros que uses).
-5. **Banco Q&A** (opcional): `pip install -e ./contexts/banco_qa` y `python -m banco_qa seed` (ver `Makefile` target `seed`).
-6. **Demo de datos**: `make demo` (200 PQRS sintéticas; requiere pasos 3–4).
-7. **API Rust**: `cd contexts/api && cargo run` (puerto `PORT` o 8080).
-8. **Frontend**: `cd contexts/presentation && npm install && npm run dev`.
-9. **Orquestación** (opcional): worker Redis + grafo LangGraph (`python -m orchestration worker` desde entorno con dependencias instaladas).
-10. **Modelo LLM**: `make pull-model` o `bash scripts/pull-ollama-model.sh` cuando Ollama esté arriba.
+5. **Demo de datos**: `make demo` (200 PQRS sintéticas; requiere pasos 3–4).
+6. **API Rust**: `cd contexts/api && cargo run` (puerto `PORT` o 8080).
+7. **Frontend**: `cd contexts/presentation && npm install && npm run dev`.
+8. **Orquestación** (opcional): worker Redis + grafo LangGraph (`python -m orchestration worker` desde entorno con dependencias instaladas).
+9. **Modelo LLM**: `make pull-model` o `bash scripts/pull-ollama-model.sh` cuando Ollama esté arriba.
 
 ## 2. Comprobaciones rápidas
 

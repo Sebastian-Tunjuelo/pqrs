@@ -56,13 +56,10 @@ try {
 }
 
 Write-Step "4. Seeds dim_secretaria y dim_territorio (puede tardar si el SQL es grande)"
-Get-Content (Join-Path $Root "data\seed\seed_dim_secretaria.sql") -Raw |
+# UTF-8: sin esto, en Windows los acentos de los SQL pueden corromperse al pipear a psql.
+Get-Content (Join-Path $Root "data\seed\seed_dim_secretaria.sql") -Raw -Encoding utf8 |
     docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
-Get-Content (Join-Path $Root "data\seed\seed_dim_territorio.sql") -Raw |
-    docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
-
-Write-Step "4b. Banco Q&A (tabla banco_qa)"
-Get-Content (Join-Path $Root "data\seed\seed_banco_qa.sql") -Raw |
+Get-Content (Join-Path $Root "data\seed\seed_dim_territorio.sql") -Raw -Encoding utf8 |
     docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
 
 Write-Step "5. Demo 200 PQRS sintéticas"

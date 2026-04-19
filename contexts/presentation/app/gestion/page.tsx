@@ -45,7 +45,7 @@ export default async function GestionPage() {
             href="/asistente?tab=gestion"
             className="font-medium text-primary underline decoration-accent underline-offset-2 hover:opacity-90"
           >
-            Asistente Ollama: borrador de mensaje para el equipo de gestión
+            Asistente: borrador de mensaje para el equipo de gestión
           </Link>
         </p>
       </div>

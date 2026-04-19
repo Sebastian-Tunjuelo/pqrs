@@ -34,10 +34,10 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Step "1/3 Docker Compose (postgres, redis, ollama)"
+Write-Step "1/4 Docker Compose (postgres, redis, ollama)"
 docker compose -f $Compose up -d
 
-Write-Step "2/3 Esperando Postgres (hasta ~120 s)"
+Write-Step "2/4 Esperando Postgres (hasta ~120 s)"
 $ready = $false
 for ($i = 0; $i -lt 60; $i++) {
     docker compose -f $Compose exec -T postgres pg_isready -U pqrs -d pqrs 2>$null | Out-Null

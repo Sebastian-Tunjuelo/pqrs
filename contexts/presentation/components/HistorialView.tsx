@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { apiFetch } from "@/lib/api";
+import { tipoConSignificado } from "@/lib/tipoPqrs";
 import type { Paginated, PqrsListItem } from "@/lib/types";
 
 function diasCalendarioRestantes(fechaLimite: string | null): string {
@@ -10,6 +11,11 @@ function diasCalendarioRestantes(fechaLimite: string | null): string {
   const t = new Date(fechaLimite + "T12:00:00").getTime();
   const d = Math.ceil((t - Date.now()) / (86400 * 1000));
   return String(d);
+}
+
+function secretariaDisplay(r: PqrsListItem): string {
+  const n = r.secretaria_nombre?.trim();
+  return n ?? "";
 }
 
 function toCsv(rows: PqrsListItem[]): string {
@@ -28,8 +34,8 @@ function toCsv(rows: PqrsListItem[]): string {
     [
       r.id_externo ?? r.id,
       r.fecha_radicado,
-      r.tipo ?? "",
-      "",
+      tipoConSignificado(r.tipo),
+      secretariaDisplay(r),
       r.estado_clasificacion,
       r.estado_gestion ?? "",
       r.validation_status ?? "",
@@ -298,8 +304,14 @@ export function HistorialView() {
                 <tr key={r.id} className="border-t border-neutral-100 hover:bg-neutral-50/80">
                   <td className="px-3 py-2 font-mono text-xs">{r.id_externo ?? r.id.slice(0, 8)}</td>
                   <td className="px-3 py-2 text-xs">{r.fecha_radicado?.slice(0, 10)}</td>
-                  <td className="px-3 py-2">{r.tipo}</td>
-                  <td className="px-3 py-2 text-neutral-500">—</td>
+                  <td className="px-3 py-2 text-xs leading-snug">{tipoConSignificado(r.tipo)}</td>
+                  <td className="px-3 py-2 text-xs">
+                    {secretariaDisplay(r) ? (
+                      <span className="text-neutral-800 line-clamp-3">{r.secretaria_nombre}</span>
+                    ) : (
+                      <span className="text-neutral-400">—</span>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-xs">
                     <div>{r.estado_clasificacion}</div>
                     <div className="text-neutral-500">{r.validation_status}</div>

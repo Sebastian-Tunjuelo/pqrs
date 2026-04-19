@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
+import { tipoConSignificado } from "@/lib/tipoPqrs";
 import type { MetricasDashboard } from "@/lib/types";
 
 const Plot = dynamic(() => import("react-plotly.js"), {
@@ -25,7 +26,7 @@ export function DashboardExtraCharts({ metricas }: Props) {
     const porTipo = metricas.por_tipo ?? {};
     return Object.entries(porTipo).sort(([a], [b]) => a.localeCompare(b));
   }, [metricas.por_tipo]);
-  const tx = tipoEntries.map(([k]) => k);
+  const txLabels = tipoEntries.map(([k]) => tipoConSignificado(k));
   const ty = tipoEntries.map(([, v]) => Number(v));
 
   const tend = Array.isArray(metricas.tendencia_semanal) ? metricas.tendencia_semanal : [];
@@ -36,12 +37,11 @@ export function DashboardExtraCharts({ metricas }: Props) {
     <div className="grid gap-6 lg:grid-cols-3">
       <div className="rounded-card border border-neutral-100 bg-white p-4 shadow-card lg:col-span-2">
         <h2 className="mb-2 text-base font-semibold text-neutral-900">PQRS por tipo (volumen)</h2>
-        <p className="mb-2 text-xs text-neutral-500">Distribución agregada desde el mismo endpoint de métricas.</p>
         <Plot
           data={[
             {
               type: "bar",
-              x: tx,
+              x: txLabels,
               y: ty,
               marker: { color: PRIMARY }
             }
@@ -66,7 +66,7 @@ export function DashboardExtraCharts({ metricas }: Props) {
           data={[
             {
               type: "pie",
-              labels: tx,
+              labels: txLabels,
               values: ty,
               hole: 0.45,
               marker: { colors: [PRIMARY, ACCENT, "#D32F2F", "#388E3C", MUTED, "#1A1A1A"] }

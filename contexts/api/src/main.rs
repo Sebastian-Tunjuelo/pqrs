@@ -57,16 +57,7 @@ async fn main() {
         }
     };
 
-    let embedding_url = std::env::var("EMBEDDING_URL")
-        .ok()
-        .map(|s| s.trim().to_string())
-        .filter(|s| !s.is_empty());
-
-    let state = AppState {
-        pool,
-        redis,
-        embedding_url,
-    };
+    let state = AppState { pool, redis };
 
     let origins = [
         HeaderValue::from_static("http://localhost:3000"),

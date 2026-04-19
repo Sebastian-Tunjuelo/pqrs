@@ -60,8 +60,7 @@ pub async fn pqrs_por_secretaria(
     .fetch_one(&state.pool)
     .await?;
 
-    let items = sqlx::query_as::<_, PqrsListItem>(
-        r#"
+    let data_sql = r#"
         SELECT
             p.id,
             p.id_externo,
@@ -74,13 +73,17 @@ pub async fn pqrs_por_secretaria(
             p.nivel_riesgo,
             p.territorio_id,
             p.confianza_clasificacion::float8 AS confianza_clasificacion,
-            p.validation_status::text AS validation_status
+            p.validation_status::text AS validation_status,
+            $1::varchar AS secretaria_codigo,
+            ds.nombre AS secretaria_nombre
         FROM pqrs p
         INNER JOIN pqrs_secretaria ps ON ps.pqrs_id = p.id AND ps.secretaria_codigo = $1
+        INNER JOIN dim_secretaria ds ON ds.codigo = $1
         ORDER BY p.fecha_radicado DESC
         LIMIT $2 OFFSET $3
-        "#,
-    )
+        "#;
+
+    let items = sqlx::query_as::<_, PqrsListItem>(&data_sql)
     .bind(&codigo)
     .bind(per)
     .bind(offset)
