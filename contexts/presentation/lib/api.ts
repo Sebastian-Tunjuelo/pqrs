@@ -44,6 +44,14 @@ export async function apiPostJson<T>(path: string, body: unknown): Promise<T> {
   });
 }
 
+export async function apiPatchJson<T>(path: string, body: unknown): Promise<T> {
+  return apiFetch<T>(path, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+}
+
 /** Asistente Ollama vía ruta Next (`/api/assist/ollama`), sin depender de endpoints assist en la API Rust. */
 export async function apiPostAssist<T>(body: { pqrs_id: string; mode: string }): Promise<T> {
   const res = await fetch("/api/assist/ollama", {

@@ -2,10 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
 :root {
   color-scheme: light;
+  --color-primary: #00693e;
+  --color-accent: #f5a800;
+  --color-danger: #d32f2f;
+  --color-warning: #f57c00;
+  --color-success: #388e3c;
+  --color-neutral-50: #f4f4f4;
+  --color-neutral-900: #1a1a1a;
 }
 
 body {
-  @apply min-h-screen bg-slate-50 text-slate-900 antialiased;
+  @apply min-h-screen bg-neutral-50 text-neutral-900 antialiased;
 }

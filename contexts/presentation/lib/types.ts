@@ -101,3 +101,16 @@ export type BancoQaRow = {
 };
 
 export type BancoQaSemanticRow = BancoQaRow & { similarity: number };
+
+export type AlertaItem = {
+  id: number;
+  pqrs_id: string;
+  tipo: string;
+  mensaje: string | null;
+  activa: boolean;
+  creado_en: string;
+  fecha_limite: string | null;
+  id_externo: string | null;
+  nivel_riesgo: string | null;
+  dias_habiles_restantes: number;
+};
