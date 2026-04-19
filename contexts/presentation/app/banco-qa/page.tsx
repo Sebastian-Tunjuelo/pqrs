@@ -36,7 +36,19 @@ export default async function BancoQaPage() {
         <h2 className="mb-3 text-base font-semibold text-slate-800">Catálogo ({rows.length})</h2>
         <ul className="space-y-3">
           {rows.length === 0 && (
-            <li className="text-sm text-slate-500">No hay entradas en banco_qa.</li>
+            <li className="rounded-lg border border-amber-100 bg-amber-50/80 p-4 text-sm text-amber-950">
+              <p className="font-medium">La tabla está vacía</p>
+              <p className="mt-1 text-amber-900/90">
+                Cargue el semillero SQL (recomendado con el resto de seeds) o use el CLI Python desde la raíz del repo:
+              </p>
+              <pre className="mt-2 overflow-x-auto rounded-md bg-white/80 p-2 text-xs text-slate-800">
+                {`Get-Content .\\data\\seed\\seed_banco_qa.sql -Raw | docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
+
+# o bien:
+# pip install -e .\\contexts\\banco_qa
+# py -3.12 -m banco_qa.cli seed --file glosarios\\banco_qa.yaml`}
+              </pre>
+            </li>
           )}
           {rows.map((r) => (
             <li key={r.id} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
