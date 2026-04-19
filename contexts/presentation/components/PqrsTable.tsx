@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { PqrsListItem } from "@/lib/types";
 
 function fmtDate(iso: string | null): string {
@@ -64,7 +66,16 @@ export function PqrsTable({
               <tr key={row.id} className="hover:bg-slate-50/80">
                 <td className="whitespace-nowrap px-4 py-2 font-mono text-xs">{row.tipo ?? "—"}</td>
                 <td className="max-w-md px-4 py-2 text-slate-700">
-                  <span className="line-clamp-2">{row.contenido}</span>
+                  <Link
+                    href={`/pqrs/${row.id}`}
+                    className="group block rounded-md px-1 py-0.5 outline-none ring-brand-400 hover:bg-brand-50 focus-visible:ring-2"
+                    title="Ver texto completo"
+                  >
+                    <span className="line-clamp-2 group-hover:text-brand-950">{row.contenido}</span>
+                    <span className="mt-1 block text-xs font-medium text-brand-600 underline-offset-2 group-hover:underline">
+                      Ver texto completo
+                    </span>
+                  </Link>
                 </td>
                 <td className="whitespace-nowrap px-4 py-2 text-slate-600">
                   {fmtDate(row.fecha_radicado)}

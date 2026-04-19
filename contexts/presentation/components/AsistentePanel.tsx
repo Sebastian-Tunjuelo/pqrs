@@ -155,14 +155,24 @@ export function AsistentePanel({ initialTab }: { initialTab?: AssistMode }) {
             ))}
           </select>
         </div>
-        <button
-          type="button"
-          disabled={loading || loadingList || !selectedId}
-          onClick={() => void runAssist()}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-brand-700 disabled:opacity-60"
-        >
-          {loading ? "Consultando Ollama…" : "Consultar Ollama"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={loading || loadingList || !selectedId}
+            onClick={() => void runAssist()}
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-brand-700 disabled:opacity-60"
+          >
+            {loading ? "Consultando Ollama…" : "Consultar Ollama"}
+          </button>
+          {selectedId ? (
+            <Link
+              href={`/pqrs/${selectedId}`}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-brand-700 shadow-sm hover:bg-slate-50"
+            >
+              Ver texto completo
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       {err && (

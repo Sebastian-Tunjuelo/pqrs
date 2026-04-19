@@ -2,11 +2,14 @@
 """
 Inserta PQRS sintéticas para demo (metadata.demo = true, id_externo DEMO-#####).
 
+Los textos siguen tres arquetipos inspirados en criterios de radicación de la
+Alcaldía de Medellín (petición formal aceptada, redacción ilegible, lenguaje ofensivo).
+
 Requisitos: Postgres con migración warehouse aplicada y seeds de dim_secretaria
 y dim_territorio cargados.
 
 Uso (desde la raíz del repo):
-  DATABASE_URL=postgresql://pqrs:pqrs@localhost:5432/pqrs?sslmode=disable \\
+  DATABASE_URL=postgresql://pqrs:pqrs@localhost:5433/pqrs?sslmode=disable \\
     python scripts/demo_seed_pqrs.py
 
 Opciones:
@@ -28,39 +31,101 @@ import psycopg
 
 DEMO_FLAG = {"demo": True}
 
-TIPOS = ["P", "Q", "R", "S", "D"]
-ACEPTADAS = "ACEPTADA"
+ACEPTADA = "ACEPTADA"
 RECHAZO_O = "RECHAZADA_OFENSIVO"
 RECHAZO_NE = "RECHAZADA_NO_ENTENDIBLE"
-PENDIENTE_C = "PENDIENTE"
 
-GESTIONES = ["PENDIENTE", "EN_TRAMITE", "RESPONDIDA", "VENCIDA"]
+GESTIONES_ACEPTADAS = ["PENDIENTE", "EN_TRAMITE", "RESPONDIDA", "VENCIDA"]
 RIESGOS = ["BAJO", "MEDIO", "ALTO", "CRITICO", None]
-
-FRASES = [
-    "Solicito información sobre el trámite de {} en la comuna.",
-    "Queja por demora en la respuesta del trámite {}.",
-    "Reclamo por servicio de {} no prestado según cronograma.",
-    "Sugerencia de mejora en el canal de atención para {}.",
-    "Denuncia relacionada con {} en espacio público.",
-]
-TRAMITES = [
-    "licencia de construcción",
-    "pico y placa",
-    "matrícula escolar",
-    "recolección de residuos",
-    "parques y bibliotecas",
-    "salud preventiva",
-    "emprendimiento local",
-]
 
 
 def _hash_contenido(texto: str) -> str:
     return hashlib.sha256(texto.encode("utf-8")).hexdigest()
 
 
+def _contenido_aceptada(i: int, id_ext: str) -> str:
+    comuna = 10 + (i % 9)
+    return f"""Estimada Alcaldía de Medellín,
+
+Por medio de este documento solicito información referente a los proyectos de
+infraestructura vial ejecutados en la comuna {comuna} durante el año 2023.
+
+Específicamente requiero:
+- Presupuesto asignado
+- Estado de avance
+- Cronograma de ejecución
+- Responsable del proyecto
+
+Cordialmente,
+Juan Carlos Pérez González
+CC: {1000000000 + i}
+
+Referencia interna: {id_ext}."""
+
+
+def _contenido_ilegible(i: int, id_ext: str) -> str:
+    variantes = [
+        (
+            "xola k tal esto es sobre eso dk la vía xq ayer pasé y noooo m enendí "
+            "y entonces q paso q el señor ese dijo k pa q mañana o pasado xa cuando "
+            "vuelva a pasar x hay pero eso no es claro sabe parece k ay un hoyo "
+            "o algo x la cra 30 y ndie ha hecho nada desde el año pasado q dije "
+            "algo ahora q vuelvo a decir q hagan algo porfa muchas gracias"
+        ),
+        (
+            "buenas tardes es q necesito q me ayuden con eso del parque xq va mal "
+            "y no se sabe ni cuando ni pa cuando y yo ya pregunté y nada q me dicen "
+            "claro entonces q hago yo si ndie responde y eso lleva meses ya gracias"
+        ),
+        (
+            "hola miren es q hay un problema con el arbol q cayó y eso y entonces "
+            "yo llamé y me dijeron k ya pero no vino nadie y sigue igual entonces "
+            "xq no hacen nada si eso es peligroso pa los niños del barrio gracias"
+        ),
+    ]
+    cuerpo = variantes[i % len(variantes)]
+    return f"{cuerpo}\n\nRadicado interno: {id_ext}."
+
+
+def _contenido_ofensivo(i: int, id_ext: str) -> str:
+    """Texto de reclamo con lenguaje irrespetuoso (solo entorno demo / clasificador)."""
+    variantes = [
+        (
+            "¡¿QUÉ VAINA ES ESTA?! Ustedes son unos inútiles de mierda, hace tres meses "
+            "reporté un problema de agua en la vereda y no han hecho un carajo. "
+            "Mientras tanto, el alcalde se lleva la plata robada como siempre y los "
+            "trabajadores son unos maricones que no hacen nada. Dejen de ser tan jodidos "
+            "y arreglen esto de una vez o voy a hacer un escándalo en redes. "
+            "Esto es una porquería de administración, ¡qué patanes son todos!"
+        ),
+        (
+            "Esto es un desastre y ustedes son unos imbéciles que no sirven para nada. "
+            "Llevo semanas esperando respuesta y solo dan excusas de mierda. "
+            "Si no arreglan el tema del basurero voy a denunciar a todos estos ladrones. "
+            "¡Qué jodida es esta vaina!"
+        ),
+        (
+            "No aguanto más esta porquería de servicio. Son unos inútiles, unos patanes, "
+            "y el que atendió fue un idiota. Hagan algo de una vez o la vaina se les va "
+            "a ir de las manos, carajo."
+        ),
+    ]
+    cuerpo = variantes[i % len(variantes)]
+    return f"{cuerpo}\n\nIdentificador demo: {id_ext}."
+
+
+def _clasificacion_por_indice(i: int) -> str:
+    """Reparto cíclico: aceptada / ilegible / ofensivo (~un tercio cada una)."""
+    r = (i - 1) % 3
+    if r == 0:
+        return ACEPTADA
+    if r == 1:
+        return RECHAZO_NE
+    return RECHAZO_O
+
+
 def main() -> int:
-    p = argparse.ArgumentParser(description="Demo: insertar PQRS sintéticas.")
+    p = argparse.ArgumentParser(description="Demo: insertar PQRS sintéticas (arquetipos Medellín).")
     p.add_argument("--count", type=int, default=200, help="Número de filas (default 200).")
     p.add_argument(
         "--purge",
@@ -117,44 +182,52 @@ def main() -> int:
                 for i in range(1, args.count + 1):
                     pid = uuid.uuid4()
                     id_ext = f"DEMO-{i:05d}"
-                    tipo = rng.choice(TIPOS)
-                    tramite = rng.choice(TRAMITES)
-                    plantilla = rng.choice(FRASES)
-                    contenido = plantilla.format(tramite) + f" Ref. interna demo #{i}."
+                    estado_clf = _clasificacion_por_indice(i)
+
+                    if estado_clf == ACEPTADA:
+                        tipo = "P"
+                        contenido = _contenido_aceptada(i, id_ext)
+                        estado_ges = rng.choice(GESTIONES_ACEPTADAS)
+                        riesgo = rng.choice(RIESGOS)
+                        razon = None
+                        conf = round(rng.uniform(0.86, 0.99), 2)
+                    elif estado_clf == RECHAZO_NE:
+                        tipo = rng.choice(["Q", "R"])
+                        contenido = _contenido_ilegible(i, id_ext)
+                        estado_ges = "PENDIENTE"
+                        riesgo = None
+                        razon = (
+                            "Falta de claridad redaccional, sin estructura, sin datos de "
+                            "identificación claros. Texto tipo mensajería difícil de entender (demo)."
+                        )
+                        conf = round(rng.uniform(0.88, 0.95), 2)
+                    else:
+                        tipo = "R"
+                        contenido = _contenido_ofensivo(i, id_ext)
+                        estado_ges = "PENDIENTE"
+                        riesgo = None
+                        razon = (
+                            "Lenguaje vulgar, ofensivo e irrespetuoso. Incumplimiento de normas de "
+                            "cortesía en peticiones oficiales (demo)."
+                        )
+                        conf = round(rng.uniform(0.96, 1.0), 2)
+
                     h = _hash_contenido(contenido + str(pid))
                     terr_id = rng.choice(territorios)
                     lon = -75.58 + rng.random() * 0.06
                     lat = 6.22 + rng.random() * 0.08
                     rad = datetime.now(UTC) - timedelta(days=rng.randint(0, 120))
-                    lim = date.today() + timedelta(days=rng.randint(5, 60))
+                    lim = date.today() + timedelta(days=rng.randint(5, 60)) if estado_clf == ACEPTADA else None
 
-                    r_clf = rng.random()
-                    if r_clf < 0.72:
-                        estado_clf = ACEPTADAS
-                        estado_ges = rng.choice(GESTIONES)
-                        riesgo = rng.choice(RIESGOS)
-                        razon = None
-                        conf = round(rng.uniform(0.55, 0.99), 2)
-                    elif r_clf < 0.86:
-                        estado_clf = RECHAZO_NE
-                        estado_ges = "PENDIENTE"
-                        riesgo = None
-                        razon = "Texto insuficiente o ilegible (demo)."
-                        conf = 0.9
-                    elif r_clf < 0.93:
-                        estado_clf = RECHAZO_O
-                        estado_ges = "PENDIENTE"
-                        riesgo = None
-                        razon = "Coincidencia glosario (demo)."
-                        conf = 1.0
-                    else:
-                        estado_clf = PENDIENTE_C
-                        estado_ges = "PENDIENTE"
-                        riesgo = rng.choice(RIESGOS)
-                        razon = None
-                        conf = round(rng.uniform(0.4, 0.7), 2)
-
-                    meta = {**DEMO_FLAG, "synthetic_index": i, "tramite": tramite}
+                    meta = {
+                        **DEMO_FLAG,
+                        "synthetic_index": i,
+                        "arquetipo_demo": (
+                            "aceptada_informacion_vial"
+                            if estado_clf == ACEPTADA
+                            else ("ilegible_chat" if estado_clf == RECHAZO_NE else "ofensivo_reclamo")
+                        ),
+                    }
 
                     cur.execute(
                         """
@@ -178,7 +251,7 @@ def main() -> int:
                             "cont": contenido,
                             "hash": h,
                             "rad": rad,
-                            "lim": lim if estado_clf == ACEPTADAS else None,
+                            "lim": lim,
                             "eclf": estado_clf,
                             "eges": estado_ges,
                             "riesgo": riesgo,
@@ -190,7 +263,7 @@ def main() -> int:
                             "meta": json.dumps(meta),
                         },
                     )
-                    if estado_clf == ACEPTADAS and rng.random() < 0.85:
+                    if estado_clf == ACEPTADA and rng.random() < 0.92:
                         sec = rng.choice(secretarias)
                         cur.execute(
                             """
@@ -200,13 +273,16 @@ def main() -> int:
                             (
                                 pid,
                                 sec,
-                                round(rng.uniform(0.35, 0.95), 2),
-                                "Coincidencia keywords (demo).",
+                                round(rng.uniform(0.55, 0.95), 2),
+                                "Coincidencia temática con secretaría (demo).",
                             ),
                         )
                     inserted += 1
 
-    print(f"OK: insertadas {inserted} PQRS demo (id_externo DEMO-#####).", flush=True)
+    print(
+        f"OK: insertadas {inserted} PQRS demo (ciclo aceptada / ilegible / ofensivo; id_externo DEMO-#####).",
+        flush=True,
+    )
     return 0
 
 

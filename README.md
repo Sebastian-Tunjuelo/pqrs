@@ -2,6 +2,8 @@
 
 Monorepo del sistema multi-agente DDD para gestión de PQRS (Medellín), descrito en detalle en [**`ARCHITECTURE.md`**](ARCHITECTURE.md): ingestion, clasificación, priorización (Ley 1755), ruteo, warehouse, API Rust (Axum), frontend Next.js, orquestación LangGraph y banco Q&A.
 
+**Asistentes de IA:** guía corta de arranque, puertos y estructura en [**`AGENTS.md`**](AGENTS.md).
+
 **Stack local:** Docker (Postgres/PostGIS, Redis, Ollama), Python 3.11+, Node 20+ (frontend), Rust (API). Sin servicios de pago obligatorios.
 
 ---

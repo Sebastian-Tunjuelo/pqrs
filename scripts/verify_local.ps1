@@ -6,13 +6,24 @@
     Ejecutar desde la raíz del repo en PowerShell:
         .\scripts\verify_local.ps1
 
-    Requisitos: Docker Desktop, Python 3.12+ (`py -3.12`), imagen postgis/postgis (primera vez: descarga grande).
+    O el flujo completo (tests + build):
+        .\scripts\run_all.ps1
+        scripts\run_all.cmd
 
-    No inicia la API Rust ni Next.js; al final indica cómo probarlos.
+    Para ver la web (API + Next en ventanas aparte), tras tener la BD lista:
+        .\scripts\start_stack.ps1
+        scripts\start_stack.cmd
+
+    Requisitos: Docker Desktop, Python 3.11+ (py o python en PATH), imagen postgis/postgis (primera vez: descarga grande).
+
+    No inicia la API Rust ni Next.js por sí mismo; use start_stack o los comandos al final.
 #>
 $ErrorActionPreference = "Stop"
 $Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location $Root
+
+. (Join-Path $PSScriptRoot "_resolve_python.ps1")
+Write-Host "Python usado: $global:PqrsPythonExe" -ForegroundColor DarkGray
 
 function Write-Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
 
@@ -31,12 +42,12 @@ if (-not $ready) {
 }
 
 Write-Step "3. Instalar warehouse + Alembic"
-py -3.12 -m pip install -q -e (Join-Path $Root "contexts\warehouse")
+& $global:PqrsPythonExe -m pip install -q -e (Join-Path $Root "contexts\warehouse")
 
 $env:DATABASE_URL = "postgresql+psycopg://pqrs:pqrs@localhost:5433/pqrs"
 Push-Location (Join-Path $Root "contexts\warehouse")
 try {
-    py -3.12 -m alembic upgrade head
+    & $global:PqrsPythonExe -m alembic upgrade head
 } finally {
     Pop-Location
 }
@@ -53,8 +64,8 @@ Get-Content (Join-Path $Root "data\seed\seed_banco_qa.sql") -Raw |
 
 Write-Step "5. Demo 200 PQRS sintéticas"
 $env:DATABASE_URL = "postgresql://pqrs:pqrs@localhost:5433/pqrs?sslmode=disable"
-py -3.12 -m pip install -q -r (Join-Path $Root "scripts\requirements-demo.txt")
-py -3.12 (Join-Path $Root "scripts\demo_seed_pqrs.py") --purge
+& $global:PqrsPythonExe -m pip install -q -r (Join-Path $Root "scripts\requirements-demo.txt")
+& $global:PqrsPythonExe (Join-Path $Root "scripts\demo_seed_pqrs.py") --purge
 
 Write-Step "6. Comprobar API (opcional)"
 try {
@@ -69,6 +80,6 @@ try {
 
 Write-Step "7. E2E (requiere API arriba)"
 Write-Host '  pip install -e .\e2e' -ForegroundColor Gray
-Write-Host '  py -3.12 -m pytest .\e2e\tests -q -m e2e' -ForegroundColor Gray
+Write-Host "  & `"$global:PqrsPythonExe`" -m pytest .\e2e\tests -q -m e2e" -ForegroundColor Gray
 
 Write-Host "`nListo: Postgres tiene esquema, dimensiones y ~200 PQRS demo." -ForegroundColor Green

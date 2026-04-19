@@ -12,6 +12,26 @@ export type PqrsListItem = {
   confianza_clasificacion: number | null;
 };
 
+/** Respuesta de `GET /api/v1/pqrs/:id` (API Rust). */
+export type PqrsDetail = {
+  id: string;
+  id_externo: string | null;
+  tipo: string | null;
+  contenido: string;
+  contenido_hash: string | null;
+  fecha_radicado: string;
+  fecha_limite: string | null;
+  estado_clasificacion: string;
+  estado_gestion: string | null;
+  nivel_riesgo: string | null;
+  territorio_id: number | null;
+  confianza_clasificacion: number | null;
+  razon_rechazo: string | null;
+  metadata: unknown | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
 export type Paginated<T> = {
   items: T[];
   total: number;
