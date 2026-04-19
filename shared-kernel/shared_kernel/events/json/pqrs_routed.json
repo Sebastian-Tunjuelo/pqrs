@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqrs-medellin.local/schemas/pqrs_routed.json",
+  "title": "PqrsRouted",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_type",
+    "version",
+    "occurred_at",
+    "pqrs_id",
+    "secretarias_recomendadas",
+    "es_multidependencia",
+    "secretaria_lider"
+  ],
+  "properties": {
+    "event_type": { "const": "PqrsRouted" },
+    "version": { "const": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "pqrs_id": { "type": "string", "format": "uuid" },
+    "secretarias_recomendadas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["codigo", "nombre", "score", "motivo"],
+        "properties": {
+          "codigo": { "type": "string", "minLength": 1 },
+          "nombre": { "type": "string", "minLength": 1 },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "motivo": { "type": "string" }
+        }
+      }
+    },
+    "es_multidependencia": { "type": "boolean" },
+    "secretaria_lider": { "type": "string", "minLength": 1 }
+  }
+}

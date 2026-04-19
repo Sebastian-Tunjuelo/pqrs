@@ -1,0 +1,25 @@
+MEDIO:
+  economico:
+    - desempleo prolongado
+    - embargo
+    - desalojo inminente
+    - sin alimentación
+  servicios_basicos:
+    - sin agua
+    - sin luz
+    - sin alcantarillado
+    - basuras acumuladas
+  laboral:
+    - despido injusto
+    - acoso laboral
+    - salarios adeudados
+
+BAJO:
+  consultas:
+    - solicitud información
+    - aclaración trámite
+    - copia documento
+    - consulta normativa
+  sugerencias:
+    - propuesta mejora
+    - idea proyecto

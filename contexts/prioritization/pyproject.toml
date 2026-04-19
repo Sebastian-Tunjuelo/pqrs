@@ -1,0 +1,40 @@
+[project]
+name = "pqrs-prioritization"
+version = "0.1.0"
+description = "Prioritization bounded context for PQRS Medellin"
+requires-python = ">=3.11"
+dependencies = [
+  "pqrs-shared-kernel>=0.1.0",
+  "pydantic>=2.8",
+  "holidays>=0.64",
+  "ollama>=0.3",
+  "pyyaml>=6.0",
+]
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+]
+jobs = [
+  "APScheduler>=3.10.0",
+  "psycopg[binary]>=3.2",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["prioritization*"]

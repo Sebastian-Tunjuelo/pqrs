@@ -1,0 +1,35 @@
+[project]
+name = "pqrs-orchestration"
+version = "0.1.0"
+description = "LangGraph orchestration for PQRS Medellin"
+requires-python = ">=3.11"
+dependencies = [
+  "pqrs-shared-kernel>=0.1.0",
+  "langgraph>=0.2",
+  "redis>=5.0",
+  "pydantic>=2.8",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "pytest-asyncio>=0.24",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["orchestration*"]

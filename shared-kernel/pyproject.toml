@@ -1,0 +1,37 @@
+[project]
+name = "pqrs-shared-kernel"
+version = "0.1.0"
+description = "Shared kernel package for PQRS Medellin contexts"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.8",
+  "jsonschema>=4.23",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "mypy>=1.11",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["shared_kernel*"]
+
+[tool.setuptools.package-data]
+shared_kernel = ["events/json/*.json"]
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

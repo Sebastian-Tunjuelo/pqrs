@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqrs-medellin.local/schemas/pqrs_ingested.json",
+  "title": "PqrsIngested",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_type",
+    "version",
+    "occurred_at",
+    "pqrs_id",
+    "contenido",
+    "fecha_radicado",
+    "source"
+  ],
+  "properties": {
+    "event_type": { "const": "PqrsIngested" },
+    "version": { "const": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "pqrs_id": { "type": "string", "format": "uuid" },
+    "id_externo": { "type": ["string", "null"] },
+    "contenido": { "type": "string", "minLength": 1 },
+    "fecha_radicado": { "type": "string", "format": "date-time" },
+    "source": { "type": "string", "enum": ["medata_api", "medata_scrape", "medata_dcat"] },
+    "metadata": { "type": "object" }
+  }
+}

@@ -1,0 +1,23 @@
+[project]
+name = "pqrs-e2e"
+version = "0.1.0"
+description = "Pruebas de humo HTTP contra la API Rust (Card 13)"
+requires-python = ">=3.11"
+dependencies = [
+  "httpx>=0.27",
+  "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "e2e: requiere API en E2E_API_URL (default http://127.0.0.1:8080)",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pqrs_e2e*"]

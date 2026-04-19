@@ -1,0 +1,35 @@
+[project]
+name = "pqrs-routing"
+version = "0.1.0"
+description = "Routing bounded context for PQRS Medellin"
+requires-python = ">=3.11"
+dependencies = [
+  "pqrs-shared-kernel>=0.1.0",
+  "pydantic>=2.8",
+  "ollama>=0.3",
+  "pyyaml>=6.0",
+]
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["routing*"]

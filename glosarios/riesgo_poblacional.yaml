@@ -1,0 +1,40 @@
+CRITICO:
+  integridad_fisica:
+    - amenaza de muerte
+    - agresión física
+    - herido
+    - sangre
+    - arma de fuego
+    - cuchillo
+    - disparo
+    - atentado
+  menores_en_riesgo:
+    - abuso menor
+    - maltrato infantil
+    - niño perdido
+    - menor desaparecido
+    - violencia en colegio
+  emergencia_salud:
+    - moribundo
+    - paro cardíaco
+    - UCI
+    - ambulancia urgente
+    - desangrando
+  riesgo_colectivo:
+    - derrumbe inminente
+    - inundación
+    - incendio activo
+    - escape de gas
+    - intoxicación masiva
+
+ALTO:
+  vulnerables:
+    - adulto mayor abandonado
+    - discapacitado sin atención
+    - embarazada sin atención
+    - desplazado
+    - habitante de calle en riesgo
+  violencia_genero:
+    - violencia intrafamiliar
+    - acoso sexual
+    - feminicidio tentativa
