@@ -71,7 +71,7 @@ export function GestionValidacion({ initial }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const validate = async (action: "VALIDATE" | "REQUEST_CORRECTION") => {
+  const validate = async (action: "VALIDATE" | "REJECT" | "REQUEST_CORRECTION") => {
     if (!selected) return;
     setBusy(true);
     setErr(null);
@@ -79,7 +79,12 @@ export function GestionValidacion({ initial }: Props) {
       await apiPatchJson(`/api/v1/pqrs/${encodeURIComponent(selected.id)}/validate`, {
         action,
         officer_id: "demo-funcionario",
-        correction_note: action === "REQUEST_CORRECTION" ? note || "Solicitud de corrección" : undefined
+        correction_note:
+          action === "REQUEST_CORRECTION"
+            ? note || "Solicitud de corrección"
+            : action === "REJECT"
+              ? note || "Clasificación de IA rechazada por funcionario"
+              : undefined
       });
       window.location.reload();
     } catch (e) {
@@ -88,6 +93,35 @@ export function GestionValidacion({ initial }: Props) {
       setBusy(false);
     }
   };
+
+  const actionButtons = (
+    <div className="flex flex-wrap gap-2">
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => void validate("VALIDATE")}
+        className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+      >
+        Validar
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => void validate("REJECT")}
+        className="rounded-lg border border-danger bg-danger/10 px-3 py-2 text-xs font-semibold text-danger hover:bg-danger/20 disabled:opacity-50"
+      >
+        Rechazar
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => void validate("REQUEST_CORRECTION")}
+        className="rounded-lg border border-warning bg-warning/10 px-3 py-2 text-xs font-semibold text-warning hover:bg-warning/20 disabled:opacity-50"
+      >
+        Corregir
+      </button>
+    </div>
+  );
 
   return (
     <div id="validacion" className="grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -179,35 +213,21 @@ export function GestionValidacion({ initial }: Props) {
                 </div>
               ) : null}
               {tab === "original" && detail ? (
-                <pre className="whitespace-pre-wrap text-xs text-neutral-900">{detail.contenido}</pre>
+                <div className="space-y-3">
+                  <pre className="whitespace-pre-wrap text-xs text-neutral-900">{detail.contenido}</pre>
+                  <div className="rounded-lg border border-neutral-200 bg-white p-2">{actionButtons}</div>
+                </div>
               ) : null}
             </div>
             <div className="mt-4 space-y-2 border-t border-neutral-100 pt-4">
               <textarea
                 className="w-full rounded-lg border border-neutral-200 p-2 text-xs"
                 rows={3}
-                placeholder="Nota para solicitud de corrección (opcional)"
+                placeholder="Nota para rechazo/corrección (opcional)"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               />
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void validate("VALIDATE")}
-                  className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
-                >
-                  Validar clasificación
-                </button>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void validate("REQUEST_CORRECTION")}
-                  className="rounded-lg border border-warning bg-warning/10 px-3 py-2 text-xs font-semibold text-warning hover:bg-warning/20 disabled:opacity-50"
-                >
-                  Solicitar corrección
-                </button>
-              </div>
+              {actionButtons}
             </div>
           </>
         )}

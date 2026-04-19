@@ -7,11 +7,6 @@ const cards = [
     desc: "Consulta con filtros, tabla y exportación a CSV."
   },
   {
-    href: "/secretarias",
-    title: "Secretarías",
-    desc: "Dependencias y PQRS asociadas por código de secretaría."
-  },
-  {
     href: "/gestion",
     title: "Gestión",
     desc: "Validación humana, alertas y colas operativas."
@@ -40,7 +35,7 @@ export default function HomePage() {
           sugerencias y denuncias. Acceda a los módulos del panel desde las tarjetas siguientes.
         </p>
       </section>
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <li key={c.href}>
             <Link

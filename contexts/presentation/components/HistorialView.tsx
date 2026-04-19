@@ -355,25 +355,6 @@ export function HistorialView() {
           <p className="text-sm font-medium text-neutral-900">
             {data ? `Resultados: ${data.total} PQRS` : "Cargando…"}
           </p>
-          <label className="text-xs text-neutral-600">
-            Filtro secretaría
-            <select
-              value={secretaria}
-              onChange={(e) => {
-                setSecretaria(e.target.value);
-                setPage(1);
-                void loadPage(1);
-              }}
-              className="ml-2 rounded-lg border border-neutral-200 px-2 py-1 text-xs"
-            >
-              <option value="">Todas</option>
-              {secretariasOpts.map((s) => (
-                <option key={s.codigo} value={s.codigo}>
-                  {s.codigo} — {s.nombre}
-                </option>
-              ))}
-            </select>
-          </label>
           {loading ? <span className="text-xs text-neutral-500">Actualizando…</span> : null}
         </div>
         <div className="overflow-x-auto">
