@@ -55,16 +55,39 @@ export default async function PqrsDetallePage({ params }: { params: { id: string
   const metaStr = metaJsonString(pqrs);
   const muestraRechazo = esClasificacionRechazo(pqrs.estado_clasificacion) || Boolean(pqrs.razon_rechazo?.trim());
 
+  const radicado = pqrs.id_externo ?? pqrs.id.slice(0, 8);
+
   return (
     <main className="space-y-6">
-      <nav className="flex flex-wrap gap-3 text-sm">
-        <Link href="/historial" className="text-brand-700 underline hover:text-brand-900">
-          ← Historial
-        </Link>
-        <Link href="/gestion" className="text-brand-700 underline hover:text-brand-900">
+      <nav aria-label="Migas de pan" className="text-sm text-neutral-600">
+        <ol className="flex flex-wrap items-center gap-1">
+          <li>
+            <Link href="/" className="text-primary hover:underline">
+              Inicio
+            </Link>
+          </li>
+          <li aria-hidden className="text-neutral-400">
+            /
+          </li>
+          <li>
+            <Link href="/historial" className="text-primary hover:underline">
+              Historial
+            </Link>
+          </li>
+          <li aria-hidden className="text-neutral-400">
+            /
+          </li>
+          <li className="font-medium text-neutral-900" aria-current="page">
+            {radicado}
+          </li>
+        </ol>
+      </nav>
+      <nav className="flex flex-wrap gap-3 text-xs text-neutral-500" aria-label="Accesos rápidos">
+        <Link href="/gestion" className="text-primary hover:underline">
           Gestión
         </Link>
-        <Link href="/asistente" className="text-brand-700 underline hover:text-brand-900">
+        <span aria-hidden>·</span>
+        <Link href="/asistente" className="text-primary hover:underline">
           Asistente
         </Link>
       </nav>

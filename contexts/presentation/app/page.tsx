@@ -4,31 +4,38 @@ const cards = [
   {
     href: "/historial",
     title: "Historial",
-    desc: "PQRS aceptadas y rechazadas (clasificación)."
+    desc: "Consulta con filtros, tabla y exportación a CSV."
   },
   {
     href: "/gestion",
     title: "Gestión",
-    desc: "Respondidas, pendientes y cola por prioridad."
+    desc: "Validación humana, alertas y colas operativas."
   },
   {
     href: "/dashboard",
     title: "Dashboard",
-    desc: "Métricas, riesgo y mapa por comuna (Leaflet + Plotly)."
+    desc: "Indicadores, riesgo y mapa por territorio."
+  },
+  {
+    href: "/asistente",
+    title: "Asistente",
+    desc: "Apoyo a clasificación, riesgo, rechazo y borradores de mensaje."
   }
 ] as const;
 
 export default function HomePage() {
   return (
     <main>
-      <section className="mb-10 rounded-2xl bg-gradient-to-br from-brand-700 to-brand-900 px-6 py-10 text-white shadow-lg">
-        <h1 className="text-3xl font-bold tracking-tight">PQRS Medellín</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-50">
-          Panel de seguimiento para peticiones, quejas, reclamos y sugerencias. Los datos provienen
-          de la API Rust (<code className="rounded bg-white/10 px-1">/api/v1</code>) y Postgres.
+      <section className="mb-10 rounded-2xl bg-gradient-to-br from-primary to-primary-muted px-6 py-10 text-white shadow-lg">
+        <p className="text-xs font-semibold uppercase tracking-wider text-white/80">Atención ciudadana</p>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight">PQRS Medellín</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/90">
+          Seguimiento municipal alineado a la{" "}
+          <span className="font-semibold">Ley 1755 de 2015</span>: peticiones, quejas, reclamos,
+          sugerencias y denuncias. Acceda a los módulos del panel desde las tarjetas siguientes.
         </p>
       </section>
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <li key={c.href}>
             <Link

@@ -148,104 +148,118 @@ export function HistorialView() {
     <div className="space-y-6">
       <div className="rounded-card border border-neutral-100 bg-white p-4 shadow-card">
         <h2 className="text-base font-semibold text-neutral-900">Filtros</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="text-xs text-neutral-600">
-            Tipo
-            <select
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-            >
-              <option value="">Todos</option>
-              <option value="P">P</option>
-              <option value="Q">Q</option>
-              <option value="R">R</option>
-              <option value="S">S</option>
-              <option value="D">D</option>
-            </select>
-          </label>
-          <label className="text-xs text-neutral-600">
-            Clasificación IA
-            <select
-              value={clasif}
-              onChange={(e) => setClasif(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-            >
-              <option value="">Todas</option>
-              <option value="ACEPTADA">ACEPTADA</option>
-              <option value="RECHAZADA_OFENSIVO">RECHAZADA_OFENSIVO</option>
-              <option value="RECHAZADA_NO_ENTENDIBLE">RECHAZADA_NO_ENTENDIBLE</option>
-            </select>
-          </label>
-          <label className="text-xs text-neutral-600">
-            Estado gestión
-            <select
-              value={gestion}
-              onChange={(e) => setGestion(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-            >
-              <option value="">Todos</option>
-              <option value="PENDIENTE">PENDIENTE</option>
-              <option value="EN_TRAMITE">EN_TRAMITE</option>
-              <option value="RESPONDIDA">RESPONDIDA</option>
-              <option value="VENCIDA">VENCIDA</option>
-            </select>
-          </label>
-          <label className="text-xs text-neutral-600">
-            Validación humana
-            <select
-              value={validacion}
-              onChange={(e) => setValidacion(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-            >
-              <option value="">Todas</option>
-              <option value="PENDING_VALIDATION">PENDING_VALIDATION</option>
-              <option value="VALIDATED">VALIDATED</option>
-              <option value="REJECTED_BY_OFFICER">REJECTED_BY_OFFICER</option>
-              <option value="CORRECTION_REQUESTED">CORRECTION_REQUESTED</option>
-            </select>
-          </label>
-          <label className="text-xs text-neutral-600">
-            Riesgo
-            <select
-              value={riesgo}
-              onChange={(e) => setRiesgo(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-            >
-              <option value="">Todos</option>
-              <option value="CRITICO">CRITICO</option>
-              <option value="ALTO">ALTO</option>
-              <option value="MEDIO">MEDIO</option>
-              <option value="BAJO">BAJO</option>
-            </select>
-          </label>
-          <label className="text-xs text-neutral-600">
-            Secretaría (código)
-            <input
-              value={secretaria}
-              onChange={(e) => setSecretaria(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-              placeholder="SDE"
-            />
-          </label>
-          <label className="text-xs text-neutral-600">
-            Fecha desde
-            <input
-              type="date"
-              value={desde}
-              onChange={(e) => setDesde(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-            />
-          </label>
-          <label className="text-xs text-neutral-600">
-            Fecha hasta
-            <input
-              type="date"
-              value={hasta}
-              onChange={(e) => setHasta(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-            />
-          </label>
+        <div className="mt-4 space-y-4">
+          <fieldset className="rounded-lg border border-neutral-200 p-3">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Clasificación y seguimiento
+            </legend>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="text-xs text-neutral-600">
+                Tipo (Ley 1755)
+                <select
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                >
+                  <option value="">Todos</option>
+                  {(["P", "Q", "R", "S", "D"] as const).map((k) => (
+                    <option key={k} value={k}>
+                      {tipoConSignificado(k)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs text-neutral-600">
+                Clasificación IA
+                <select
+                  value={clasif}
+                  onChange={(e) => setClasif(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                >
+                  <option value="">Todas</option>
+                  <option value="ACEPTADA">ACEPTADA</option>
+                  <option value="RECHAZADA_OFENSIVO">RECHAZADA_OFENSIVO</option>
+                  <option value="RECHAZADA_NO_ENTENDIBLE">RECHAZADA_NO_ENTENDIBLE</option>
+                </select>
+              </label>
+              <label className="text-xs text-neutral-600">
+                Estado gestión
+                <select
+                  value={gestion}
+                  onChange={(e) => setGestion(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                >
+                  <option value="">Todos</option>
+                  <option value="PENDIENTE">PENDIENTE</option>
+                  <option value="EN_TRAMITE">EN_TRAMITE</option>
+                  <option value="RESPONDIDA">RESPONDIDA</option>
+                  <option value="VENCIDA">VENCIDA</option>
+                </select>
+              </label>
+              <label className="text-xs text-neutral-600">
+                Validación humana
+                <select
+                  value={validacion}
+                  onChange={(e) => setValidacion(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                >
+                  <option value="">Todas</option>
+                  <option value="PENDING_VALIDATION">PENDING_VALIDATION</option>
+                  <option value="VALIDATED">VALIDATED</option>
+                  <option value="REJECTED_BY_OFFICER">REJECTED_BY_OFFICER</option>
+                  <option value="CORRECTION_REQUESTED">CORRECTION_REQUESTED</option>
+                </select>
+              </label>
+              <label className="text-xs text-neutral-600">
+                Riesgo
+                <select
+                  value={riesgo}
+                  onChange={(e) => setRiesgo(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                >
+                  <option value="">Todos</option>
+                  <option value="CRITICO">CRITICO</option>
+                  <option value="ALTO">ALTO</option>
+                  <option value="MEDIO">MEDIO</option>
+                  <option value="BAJO">BAJO</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset className="rounded-lg border border-neutral-200 p-3">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              Dependencia y fechas
+            </legend>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="text-xs text-neutral-600">
+                Código secretaría (filtro)
+                <input
+                  value={secretaria}
+                  onChange={(e) => setSecretaria(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  placeholder="Ej. SIF"
+                />
+              </label>
+              <label className="text-xs text-neutral-600">
+                Fecha desde
+                <input
+                  type="date"
+                  value={desde}
+                  onChange={(e) => setDesde(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                />
+              </label>
+              <label className="text-xs text-neutral-600">
+                Fecha hasta
+                <input
+                  type="date"
+                  value={hasta}
+                  onChange={(e) => setHasta(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                />
+              </label>
+            </div>
+          </fieldset>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button
@@ -289,6 +303,9 @@ export function HistorialView() {
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
+            <caption className="sr-only">
+              Tabla de PQRS: radicado, fechas, tipo, secretaría sugerida, estado y días restantes
+            </caption>
             <thead className="bg-neutral-50 text-xs font-semibold uppercase text-neutral-600">
               <tr>
                 <th className="px-3 py-2">Radicado</th>
