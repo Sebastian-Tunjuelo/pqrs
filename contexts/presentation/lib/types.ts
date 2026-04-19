@@ -33,6 +33,17 @@ export type PqrsDetail = {
   created_at: string | null;
   updated_at: string | null;
   validation_status?: string;
+  summary_lead?: string | null;
+  summary_topics?: unknown;
+  summary_executive?: string | null;
+};
+
+/** GET /api/v1/pqrs/:id/summary */
+export type PqrsSummaryResponse = {
+  lead: string;
+  temas: string[];
+  resumen_ejecutivo: string;
+  pqrs_completa: string;
 };
 
 export type Paginated<T> = {

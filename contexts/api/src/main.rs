@@ -1,6 +1,7 @@
 use std::net::SocketAddr;
 
 use axum::Router;
+use redis::aio::ConnectionManager;
 use sqlx::postgres::PgPoolOptions;
 use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
@@ -33,7 +34,27 @@ async fn main() {
         .await
         .expect("conectar a PostgreSQL (DATABASE_URL)");
 
-    let state = AppState { pool };
+    let redis = match std::env::var("REDIS_URL") {
+        Ok(url) => match redis::Client::open(url.as_str()) {
+            Ok(client) => match ConnectionManager::new(client).await {
+                Ok(cm) => Some(cm),
+                Err(e) => {
+                    tracing::warn!(?e, "no se pudo conectar a Redis");
+                    None
+                }
+            },
+            Err(e) => {
+                tracing::warn!(?e, "REDIS_URL inválida");
+                None
+            }
+        },
+        Err(_) => {
+            tracing::info!("REDIS_URL no definida: síntesis bajo demanda deshabilitada");
+            None
+        }
+    };
+
+    let state = AppState { pool, redis };
 
     let app = Router::new()
         .nest("/api/v1", api_v1_router(state))

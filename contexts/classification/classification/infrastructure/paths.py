@@ -20,3 +20,7 @@ def glosarios_dir() -> Path:
 
 def classifier_prompt_path() -> Path:
     return find_repo_root() / "orchestration" / "prompts" / "classifier.md"
+
+
+def summary_prompt_path() -> Path:
+    return find_repo_root() / "orchestration" / "prompts" / "summary_prompt.txt"

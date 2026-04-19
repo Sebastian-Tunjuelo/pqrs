@@ -1,10 +1,13 @@
+use std::time::Duration;
+
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
+use redis::AsyncCommands;
 use uuid::Uuid;
 
-use crate::domain::models::{Paginated, PqrsDetail, PqrsListItem};
+use crate::domain::models::{Paginated, PqrsDetail, PqrsListItem, PqrsSummaryResponse};
 use crate::error::ApiError;
 use crate::state::AppState;
 
@@ -44,6 +47,80 @@ fn default_page() -> u32 {
 
 fn default_per_page() -> u32 {
     20
+}
+
+const PQRS_DETAIL_SQL: &str = r#"
+        SELECT
+            p.id,
+            p.id_externo,
+            p.tipo::text AS tipo,
+            p.contenido,
+            p.contenido_hash,
+            p.fecha_radicado,
+            p.fecha_limite,
+            p.estado_clasificacion,
+            p.estado_gestion,
+            p.nivel_riesgo,
+            p.territorio_id,
+            p.confianza_clasificacion::float8 AS confianza_clasificacion,
+            p.razon_rechazo,
+            p.metadata,
+            p.created_at,
+            p.updated_at,
+            p.validation_status::text AS validation_status,
+            p.summary_lead,
+            p.summary_topics,
+            p.summary_executive
+        FROM pqrs p
+        WHERE p.id = $1
+"#;
+
+async fn fetch_pqrs_detail(pool: &sqlx::PgPool, id: Uuid) -> Result<Option<PqrsDetail>, ApiError> {
+    sqlx::query_as::<_, PqrsDetail>(PQRS_DETAIL_SQL)
+        .bind(id)
+        .fetch_optional(pool)
+        .await
+        .map_err(Into::into)
+}
+
+fn summary_topics_nonempty(topics: &Option<serde_json::Value>) -> bool {
+    topics
+        .as_ref()
+        .and_then(|x| x.as_array())
+        .map(|a| !a.is_empty())
+        .unwrap_or(false)
+}
+
+fn has_complete_summary(d: &PqrsDetail) -> bool {
+    d.summary_lead
+        .as_ref()
+        .map(|s| !s.trim().is_empty())
+        .unwrap_or(false)
+        && d
+            .summary_executive
+            .as_ref()
+            .map(|s| !s.trim().is_empty())
+            .unwrap_or(false)
+        && summary_topics_nonempty(&d.summary_topics)
+}
+
+fn to_summary_response(d: &PqrsDetail) -> PqrsSummaryResponse {
+    let temas: Vec<String> = d
+        .summary_topics
+        .as_ref()
+        .and_then(|x| x.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|v| v.as_str().map(str::to_string))
+                .collect()
+        })
+        .unwrap_or_default();
+    PqrsSummaryResponse {
+        lead: d.summary_lead.clone().unwrap_or_default(),
+        temas,
+        resumen_ejecutivo: d.summary_executive.clone().unwrap_or_default(),
+        pqrs_completa: d.contenido.clone(),
+    }
 }
 
 const PQRS_LIST_SELECT: &str = r#"
@@ -113,38 +190,85 @@ pub async fn get_pqrs(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<PqrsDetail>, ApiError> {
-    let row = sqlx::query_as::<_, PqrsDetail>(
-        r#"
-        SELECT
-            p.id,
-            p.id_externo,
-            p.tipo::text AS tipo,
-            p.contenido,
-            p.contenido_hash,
-            p.fecha_radicado,
-            p.fecha_limite,
-            p.estado_clasificacion,
-            p.estado_gestion,
-            p.nivel_riesgo,
-            p.territorio_id,
-            p.confianza_clasificacion::float8 AS confianza_clasificacion,
-            p.razon_rechazo,
-            p.metadata,
-            p.created_at,
-            p.updated_at,
-            p.validation_status::text AS validation_status
-        FROM pqrs p
-        WHERE p.id = $1
-        "#,
-    )
-    .bind(id)
-    .fetch_optional(&state.pool)
-    .await?;
+    let row = fetch_pqrs_detail(&state.pool, id).await?;
 
     match row {
         Some(r) => Ok(Json(r)),
         None => Err(ApiError::not_found("PQRS no encontrada")),
     }
+}
+
+pub async fn get_pqrs_summary(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<PqrsSummaryResponse>, ApiError> {
+    let row = fetch_pqrs_detail(&state.pool, id).await?;
+    let Some(ref d) = row else {
+        return Err(ApiError::not_found("PQRS no encontrada"));
+    };
+
+    if has_complete_summary(d) {
+        return Ok(Json(to_summary_response(d)));
+    }
+
+    let mut redis_cm = state.redis.clone().ok_or_else(|| {
+        ApiError::bad_request(
+            "Redis no configurado (REDIS_URL). Sin Redis no se puede disparar la síntesis.",
+        )
+    })?;
+
+    let corr = Uuid::new_v4().to_string();
+    let _: String = redis::cmd("XADD")
+        .arg("pqrs.summary.jobs")
+        .arg("*")
+        .arg("correlation_id")
+        .arg(&corr)
+        .arg("pqrs_id")
+        .arg(id.to_string())
+        .query_async(&mut redis_cm)
+        .await
+        .map_err(|e| ApiError::internal(format!("Redis XADD: {e}")))?;
+
+    let key = format!("pqrs:summary:result:{corr}");
+    let mut saw_ok = false;
+    for _ in 0..300u32 {
+        let val: Option<String> = redis_cm
+            .get(&key)
+            .await
+            .map_err(|e| ApiError::internal(format!("Redis GET: {e}")))?;
+        if let Some(s) = val {
+            let j: serde_json::Value =
+                serde_json::from_str(&s).unwrap_or_else(|_| serde_json::json!({}));
+            if let Some(err) = j.get("error") {
+                let msg = err
+                    .as_str()
+                    .map(str::to_string)
+                    .unwrap_or_else(|| err.to_string());
+                return Err(ApiError::internal(format!("síntesis: {msg}")));
+            }
+            if j.get("ok").and_then(|v| v.as_bool()) == Some(true) {
+                saw_ok = true;
+                break;
+            }
+        }
+        tokio::time::sleep(Duration::from_millis(150)).await;
+    }
+
+    if !saw_ok {
+        return Err(ApiError::bad_gateway(
+            "Timeout esperando síntesis. ¿Está corriendo `python -m classification.summary_redis_worker`?",
+        ));
+    }
+
+    let d = fetch_pqrs_detail(&state.pool, id)
+        .await?
+        .ok_or_else(|| ApiError::not_found("PQRS no encontrada"))?;
+    if !has_complete_summary(&d) {
+        return Err(ApiError::internal(
+            "La síntesis no se persistió correctamente en base de datos",
+        ));
+    }
+    Ok(Json(to_summary_response(&d)))
 }
 
 pub async fn historial_aceptadas(

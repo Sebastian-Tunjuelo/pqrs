@@ -38,6 +38,17 @@ pub struct PqrsDetail {
     pub created_at: Option<DateTime<Utc>>,
     pub updated_at: Option<DateTime<Utc>>,
     pub validation_status: String,
+    pub summary_lead: Option<String>,
+    pub summary_topics: Option<serde_json::Value>,
+    pub summary_executive: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct PqrsSummaryResponse {
+    pub lead: String,
+    pub temas: Vec<String>,
+    pub resumen_ejecutivo: String,
+    pub pqrs_completa: String,
 }
 
 #[derive(Debug, Serialize, FromRow)]

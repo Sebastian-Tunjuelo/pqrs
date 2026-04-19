@@ -25,6 +25,7 @@ pub fn api_v1_router(state: AppState) -> Router {
             post(assist::explicar_rechazo),
         )
         .route("/assist/ollama/mensaje-gestion", post(assist::mensaje_gestion))
+        .route("/pqrs/:id/summary", get(pqrs::get_pqrs_summary))
         .route("/pqrs/:id/validate", patch(pqrs::validate_pqrs))
         .route("/pqrs/:id", get(pqrs::get_pqrs))
         .route("/dashboard/territorios", get(dashboard::territorios))
