@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import {
+  plazoBarFillClass,
+  plazoBarPct,
+  plazoBarTone,
+  plazoCalendarioRestante
+} from "@/lib/plazoPqrs";
 import type { PqrsListItem } from "@/lib/types";
 
-type DiasBar = { label: string; pct: number; urgent: boolean };
+type DiasBar = { label: string; pct: number; tone: "ok" | "aviso" | "critico" | "sin" };
 
 function tipoBadge(t: string | null | undefined) {
   const v = (t || "?").toUpperCase();
@@ -31,13 +37,18 @@ function riesgoBadge(r: string | null | undefined) {
 }
 
 function diasBar(fechaLimite: string | null): DiasBar {
-  if (!fechaLimite) return { label: "Sin fecha límite", pct: 0, urgent: false };
-  const lim = new Date(fechaLimite + "T12:00:00");
-  const now = new Date();
-  const total = Math.max(1, Math.ceil((lim.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-  const urgent = total <= 3;
-  const pct = Math.min(100, Math.max(5, 100 - Math.min(total * 8, 95)));
-  return { label: `${total} días cal. aprox.`, pct, urgent };
+  const p = plazoCalendarioRestante(fechaLimite);
+  if (p.variante === "sin") {
+    return { label: "Sin fecha límite", pct: 0, tone: "sin" };
+  }
+  const pct = plazoBarPct(p.dias);
+  const label =
+    p.dias != null && p.dias < 0
+      ? `${p.etiqueta} (cal.)`
+      : p.dias != null
+        ? `${p.dias} días cal. aprox.`
+        : "—";
+  return { label, pct, tone: plazoBarTone(p.variante) };
 }
 
 type Props = {
@@ -54,8 +65,8 @@ export function PqrsCard({ item, lead, secretariaLabel, onValidate, onCorrect }:
     conf != null ? `${Math.round(Number(conf) * 100)}%` : "—";
   const [bar, setBar] = useState<DiasBar>(() =>
     item.fecha_limite
-      ? { label: "Plazo (calculando…)", pct: 0, urgent: false }
-      : { label: "Sin fecha límite", pct: 0, urgent: false }
+      ? { label: "Plazo (calculando…)", pct: 0, tone: "ok" }
+      : { label: "Sin fecha límite", pct: 0, tone: "sin" }
   );
   useEffect(() => {
     setBar(diasBar(item.fecha_limite));
@@ -95,11 +106,23 @@ export function PqrsCard({ item, lead, secretariaLabel, onValidate, onCorrect }:
       <div className="mt-3">
         <div className="mb-1 flex justify-between text-xs text-neutral-900/60">
           <span>Plazo</span>
-          <span className={bar.urgent ? "font-semibold text-danger" : ""}>{bar.label}</span>
+          <span
+            className={
+              bar.tone === "critico"
+                ? "font-semibold text-danger"
+                : bar.tone === "aviso"
+                  ? "font-medium text-warning"
+                  : bar.tone === "ok"
+                    ? "font-medium text-success"
+                    : ""
+            }
+          >
+            {bar.label}
+          </span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
           <div
-            className={`h-full rounded-full transition-all ${bar.urgent ? "bg-danger" : "bg-primary"}`}
+            className={`h-full rounded-full transition-all ${plazoBarFillClass(bar.tone)}`}
             style={{ width: `${bar.pct}%` }}
           />
         </div>

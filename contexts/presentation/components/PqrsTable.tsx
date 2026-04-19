@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PlazoDiasBadge } from "@/components/PlazoDiasBadge";
 import { tipoConSignificado } from "@/lib/tipoPqrs";
 import type { PqrsListItem } from "@/lib/types";
 
@@ -60,6 +61,7 @@ export function PqrsTable({
               <th className="px-4 py-2">Clasificación</th>
               <th className="px-4 py-2">Gestión</th>
               <th className="px-4 py-2">Riesgo</th>
+              <th className="px-4 py-2">Plazo (cal.)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -86,6 +88,9 @@ export function PqrsTable({
                 <td className="whitespace-nowrap px-4 py-2 text-xs">{row.estado_clasificacion}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-xs">{row.estado_gestion ?? "—"}</td>
                 <td className="whitespace-nowrap px-4 py-2 text-xs">{row.nivel_riesgo ?? "—"}</td>
+                <td className="whitespace-nowrap px-4 py-2">
+                  <PlazoDiasBadge fechaLimite={row.fecha_limite} />
+                </td>
               </tr>
             ))}
           </tbody>

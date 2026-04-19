@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PlazoDiasBadge } from "@/components/PlazoDiasBadge";
 import { apiGetServer } from "@/lib/api";
 import {
   deQueTrataPqrs,
@@ -170,7 +171,10 @@ export default async function PqrsDetallePage({ params }: { params: { id: string
           </div>
           <div>
             <dt className="text-slate-500">Fecha límite</dt>
-            <dd className="text-slate-800">{pqrs.fecha_limite ?? "—"}</dd>
+            <dd className="flex flex-wrap items-center gap-2 text-slate-800">
+              <span>{pqrs.fecha_limite ?? "—"}</span>
+              {pqrs.fecha_limite ? <PlazoDiasBadge fechaLimite={pqrs.fecha_limite} /> : null}
+            </dd>
           </div>
           <div>
             <dt className="text-slate-500">Territorio (id)</dt>

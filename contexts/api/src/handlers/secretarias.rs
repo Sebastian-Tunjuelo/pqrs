@@ -24,6 +24,9 @@ pub async fn list_secretarias(
     Ok(Json(rows))
 }
 
+/// PQRS que tienen fila en `pqrs_secretaria` para este código (no solo la secretaría «líder»).
+/// El listado general usa `LATERAL` para exponer un único líder; si en el futuro hay varias filas
+/// por PQRS, aquí seguirán apareciendo todas las coincidencias por código.
 pub async fn pqrs_por_secretaria(
     State(state): State<AppState>,
     Path(codigo): Path<String>,

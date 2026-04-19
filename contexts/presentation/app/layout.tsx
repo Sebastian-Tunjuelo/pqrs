@@ -11,6 +11,7 @@ import "./globals.css";
 const mobileLinks = [
   ["/gestion", "Gestión"],
   ["/historial", "Historial"],
+  ["/secretarias", "Secretarías"],
   ["/dashboard", "Dashboard"],
   ["/asistente", "Asistente"]
 ] as const;

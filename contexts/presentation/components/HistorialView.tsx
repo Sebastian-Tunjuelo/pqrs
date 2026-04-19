@@ -1,24 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment } from "react";
 
+import { PlazoDiasBadge } from "@/components/PlazoDiasBadge";
 import { apiFetch } from "@/lib/api";
+import { plazoCalendarioRestante } from "@/lib/plazoPqrs";
 import { tipoConSignificado } from "@/lib/tipoPqrs";
-import type { Paginated, PqrsListItem } from "@/lib/types";
+import type { Paginated, PqrsDetail, PqrsListItem, SecretariaRow } from "@/lib/types";
 
-function diasCalendarioRestantes(fechaLimite: string | null): string {
-  if (!fechaLimite) return "—";
-  const t = new Date(fechaLimite + "T12:00:00").getTime();
-  const d = Math.ceil((t - Date.now()) / (86400 * 1000));
-  return String(d);
-}
-
-function secretariaDisplay(r: PqrsListItem): string {
+function secretariaDisplay(
+  r: PqrsListItem,
+  secretariasByCode?: Map<string, string>
+): string {
+  const codigo = r.secretaria_codigo?.trim().toUpperCase();
+  if (codigo && secretariasByCode?.has(codigo)) return secretariasByCode.get(codigo) ?? "";
   const n = r.secretaria_nombre?.trim();
   return n ?? "";
 }
 
-function toCsv(rows: PqrsListItem[]): string {
+function toCsv(rows: PqrsListItem[], secretariasByCode?: Map<string, string>): string {
   const header = [
     "radicado",
     "fecha_radicado",
@@ -28,23 +29,25 @@ function toCsv(rows: PqrsListItem[]): string {
     "estado_gestion",
     "validation_status",
     "nivel_riesgo",
-    "dias_restantes_calendario"
+    "dias_restantes_calendario",
+    "plazo_estado"
   ];
-  const lines = rows.map((r) =>
-    [
+  const lines = rows.map((r) => {
+    const plazo = plazoCalendarioRestante(r.fecha_limite);
+    const cols = [
       r.id_externo ?? r.id,
       r.fecha_radicado,
       tipoConSignificado(r.tipo),
-      secretariaDisplay(r),
+      secretariaDisplay(r, secretariasByCode),
       r.estado_clasificacion,
       r.estado_gestion ?? "",
       r.validation_status ?? "",
       r.nivel_riesgo ?? "",
-      diasCalendarioRestantes(r.fecha_limite)
-    ]
-      .map((c) => `"${String(c).replace(/"/g, '""')}"`)
-      .join(",")
-  );
+      plazo.dias != null ? String(plazo.dias) : "",
+      plazo.variante
+    ];
+    return cols.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",");
+  });
   return [header.join(","), ...lines].join("\r\n");
 }
 
@@ -73,6 +76,24 @@ export function HistorialView() {
   const [data, setData] = useState<Paginated<PqrsListItem> | null>(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedDetailById, setExpandedDetailById] = useState<Record<string, PqrsDetail>>({});
+  const [expandedLoadingId, setExpandedLoadingId] = useState<string | null>(null);
+  const [expandedErrorById, setExpandedErrorById] = useState<Record<string, string>>({});
+  const [secretariasOpts, setSecretariasOpts] = useState<SecretariaRow[]>([]);
+  const secretariasByCode = useMemo(
+    () =>
+      new Map(
+        secretariasOpts.map((s) => [s.codigo.trim().toUpperCase(), s.nombre.trim()] as const)
+      ),
+    [secretariasOpts]
+  );
+
+  useEffect(() => {
+    void apiFetch<SecretariaRow[]>("/api/v1/secretarias")
+      .then(setSecretariasOpts)
+      .catch(() => setSecretariasOpts([]));
+  }, []);
 
   const buildParams = useCallback(
     (pg: number) => {
@@ -116,7 +137,7 @@ export function HistorialView() {
 
   const exportCurrent = () => {
     if (!data?.items.length) return;
-    downloadCsv(`pqrs_historial_p${page}.csv`, toCsv(data.items));
+    downloadCsv(`pqrs_historial_p${page}.csv`, toCsv(data.items, secretariasByCode));
   };
 
   const exportAllPages = async () => {
@@ -136,13 +157,42 @@ export function HistorialView() {
         if (chunk.items.length === 0) break;
         pg += 1;
       }
-      downloadCsv("pqrs_historial_filtrado.csv", toCsv(acc));
+      downloadCsv("pqrs_historial_filtrado.csv", toCsv(acc, secretariasByCode));
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Error exportando");
     } finally {
       setLoading(false);
     }
   };
+
+  const toggleExpandRow = useCallback(
+    async (id: string) => {
+      if (expandedId === id) {
+        setExpandedId(null);
+        return;
+      }
+      setExpandedId(id);
+      if (expandedDetailById[id] || expandedLoadingId === id) return;
+      setExpandedLoadingId(id);
+      setExpandedErrorById((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      try {
+        const detail = await apiFetch<PqrsDetail>(`/api/v1/pqrs/${encodeURIComponent(id)}`);
+        setExpandedDetailById((prev) => ({ ...prev, [id]: detail }));
+      } catch (e) {
+        setExpandedErrorById((prev) => ({
+          ...prev,
+          [id]: e instanceof Error ? e.message : "Error cargando detalle"
+        }));
+      } finally {
+        setExpandedLoadingId((prev) => (prev === id ? null : prev));
+      }
+    },
+    [expandedDetailById, expandedId, expandedLoadingId]
+  );
 
   return (
     <div className="space-y-6">
@@ -232,13 +282,19 @@ export function HistorialView() {
             </legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <label className="text-xs text-neutral-600">
-                Código secretaría (filtro)
-                <input
+                Secretaría
+                <select
                   value={secretaria}
                   onChange={(e) => setSecretaria(e.target.value)}
                   className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
-                  placeholder="Ej. SIF"
-                />
+                >
+                  <option value="">Todas</option>
+                  {secretariasOpts.map((s) => (
+                    <option key={s.codigo} value={s.codigo}>
+                      {s.codigo} — {s.nombre}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="text-xs text-neutral-600">
                 Fecha desde
@@ -299,6 +355,25 @@ export function HistorialView() {
           <p className="text-sm font-medium text-neutral-900">
             {data ? `Resultados: ${data.total} PQRS` : "Cargando…"}
           </p>
+          <label className="text-xs text-neutral-600">
+            Filtro secretaría
+            <select
+              value={secretaria}
+              onChange={(e) => {
+                setSecretaria(e.target.value);
+                setPage(1);
+                void loadPage(1);
+              }}
+              className="ml-2 rounded-lg border border-neutral-200 px-2 py-1 text-xs"
+            >
+              <option value="">Todas</option>
+              {secretariasOpts.map((s) => (
+                <option key={s.codigo} value={s.codigo}>
+                  {s.codigo} — {s.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
           {loading ? <span className="text-xs text-neutral-500">Actualizando…</span> : null}
         </div>
         <div className="overflow-x-auto">
@@ -317,25 +392,60 @@ export function HistorialView() {
               </tr>
             </thead>
             <tbody>
-              {(data?.items ?? []).map((r) => (
-                <tr key={r.id} className="border-t border-neutral-100 hover:bg-neutral-50/80">
-                  <td className="px-3 py-2 font-mono text-xs">{r.id_externo ?? r.id.slice(0, 8)}</td>
-                  <td className="px-3 py-2 text-xs">{r.fecha_radicado?.slice(0, 10)}</td>
-                  <td className="px-3 py-2 text-xs leading-snug">{tipoConSignificado(r.tipo)}</td>
-                  <td className="px-3 py-2 text-xs">
-                    {secretariaDisplay(r) ? (
-                      <span className="text-neutral-800 line-clamp-3">{r.secretaria_nombre}</span>
-                    ) : (
-                      <span className="text-neutral-400">—</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-xs">
-                    <div>{r.estado_clasificacion}</div>
-                    <div className="text-neutral-500">{r.validation_status}</div>
-                  </td>
-                  <td className="px-3 py-2">{diasCalendarioRestantes(r.fecha_limite)}</td>
-                </tr>
-              ))}
+              {(data?.items ?? []).map((r) => {
+                const isExpanded = expandedId === r.id;
+                const detail = expandedDetailById[r.id];
+                const detailErr = expandedErrorById[r.id];
+                const detailLoading = expandedLoadingId === r.id;
+                return (
+                  <Fragment key={r.id}>
+                    <tr
+                      onClick={() => void toggleExpandRow(r.id)}
+                      className={`border-t border-neutral-100 ${isExpanded ? "bg-primary/5" : "hover:bg-neutral-50/80"} cursor-pointer`}
+                    >
+                      <td className="px-3 py-2 font-mono text-xs">{r.id_externo ?? r.id.slice(0, 8)}</td>
+                      <td className="px-3 py-2 text-xs">{r.fecha_radicado?.slice(0, 10)}</td>
+                      <td className="px-3 py-2 text-xs leading-snug">{tipoConSignificado(r.tipo)}</td>
+                      <td className="px-3 py-2 text-xs">
+                        {secretariaDisplay(r, secretariasByCode) ? (
+                          <span className="text-neutral-800 line-clamp-3">
+                            {secretariaDisplay(r, secretariasByCode)}
+                          </span>
+                        ) : (
+                          <span className="text-neutral-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-xs">
+                        <div>{r.estado_clasificacion}</div>
+                        <div className="text-neutral-500">{r.validation_status}</div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <PlazoDiasBadge fechaLimite={r.fecha_limite} />
+                      </td>
+                    </tr>
+                    {isExpanded ? (
+                      <tr className="border-t border-neutral-100 bg-white">
+                        <td colSpan={6} className="px-3 py-3">
+                          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+                              PQRS completa
+                            </p>
+                            {detailLoading ? (
+                              <p className="text-sm text-neutral-500">Cargando detalle…</p>
+                            ) : detailErr ? (
+                              <p className="text-sm text-danger">{detailErr}</p>
+                            ) : (
+                              <pre className="whitespace-pre-wrap break-words text-sm leading-relaxed text-neutral-800">
+                                {detail?.contenido ?? "Sin contenido"}
+                              </pre>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
