@@ -11,7 +11,7 @@ import httpx
 class MedataCkanClient:
     def __init__(
         self,
-        base_url: str = "http://medata.gov.co/api/3/action",
+        base_url: str = "https://medata.gov.co/api/3/action",
         page_size: int = 50,
         rate_limit_seconds: float = 0.2,
         http_client: httpx.AsyncClient | None = None,

@@ -24,7 +24,7 @@ class PqrsIngestedPayload(BaseModel):
     id_externo: str | None = Field(default=None, description="ID en MEData si existe")
     contenido: str
     fecha_radicado: datetime
-    source: Literal["medata_api", "medata_scrape"]
+    source: Literal["medata_api", "medata_scrape", "medata_dcat"]
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 class DataSource(str, Enum):
     MEDATA_API = "medata_api"
     MEDATA_SCRAPE = "medata_scrape"
+    MEDATA_DCAT = "medata_dcat"
 
 
 class RawPqrs(BaseModel):

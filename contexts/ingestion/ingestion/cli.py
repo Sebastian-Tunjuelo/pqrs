@@ -29,7 +29,9 @@ def fetch_command(since: str = "2024-01-01") -> None:
     import asyncio
 
     total = asyncio.run(_run())
-    typer.echo(f"Published {total} PqrsIngested events")
+    typer.echo(
+        f"Published {total} PqrsIngested events (CKAN si responde + scrape portal + data.json DCAT, deduplicado)."
+    )
 
 
 if __name__ == "__main__":

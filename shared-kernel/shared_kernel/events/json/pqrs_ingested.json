@@ -21,7 +21,7 @@
     "id_externo": { "type": ["string", "null"] },
     "contenido": { "type": "string", "minLength": 1 },
     "fecha_radicado": { "type": "string", "format": "date-time" },
-    "source": { "type": "string", "enum": ["medata_api", "medata_scrape"] },
+    "source": { "type": "string", "enum": ["medata_api", "medata_scrape", "medata_dcat"] },
     "metadata": { "type": "object" }
   }
 }
