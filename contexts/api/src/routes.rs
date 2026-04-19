@@ -37,5 +37,9 @@ pub fn api_v1_router(state: AppState) -> Router {
         )
         .route("/banco-qa", get(banco_qa::list_banco_qa))
         .route("/banco-qa/buscar", post(banco_qa::buscar_banco_qa))
+        .route(
+            "/banco-qa/buscar-semantico",
+            post(banco_qa::buscar_semantico),
+        )
         .with_state(state)
 }

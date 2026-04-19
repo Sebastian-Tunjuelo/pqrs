@@ -94,3 +94,5 @@ export type BancoQaRow = {
   tags: string[] | null;
   veces_consultada: number | null;
 };
+
+export type BancoQaSemanticRow = BancoQaRow & { similarity: number };

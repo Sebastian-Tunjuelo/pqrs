@@ -93,6 +93,17 @@ pub struct BancoQaRow {
     pub veces_consultada: Option<i32>,
 }
 
+#[derive(Debug, Serialize, FromRow)]
+pub struct BancoQaSemanticRow {
+    pub id: i32,
+    pub pregunta: String,
+    pub respuesta: String,
+    pub secretaria_codigo: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub veces_consultada: Option<i32>,
+    pub similarity: f64,
+}
+
 #[derive(Debug, serde::Deserialize)]
 pub struct BancoQaBuscarBody {
     pub query: String,

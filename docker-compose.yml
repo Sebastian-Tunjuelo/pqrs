@@ -1,6 +1,9 @@
 services:
   postgres:
-    image: postgis/postgis:16-3.4
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    image: pqrs-postgres:16-pgvector
     container_name: pqrs-postgres
     restart: unless-stopped
     environment:

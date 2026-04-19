@@ -12,6 +12,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+embedding = [
+  "sentence-transformers>=2.2.0",
+  "torch>=2.0.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
