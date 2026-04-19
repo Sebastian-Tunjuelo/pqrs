@@ -6,6 +6,14 @@ Monorepo del sistema multi-agente DDD para gestión de PQRS (Medellín), descrit
 
 **Stack local:** Docker (Postgres/PostGIS, Redis, Ollama), Python 3.11+, Node 20+ (frontend), Rust (API). Sin servicios de pago obligatorios.
 
+## Demo en 3 pasos
+
+1. **Infra y datos:** desde la raíz del repo, `make up` (o `docker compose up -d`) y luego `make demo` (o `.\scripts\verify_local.ps1` en Windows) para Alembic, seeds y PQRS demo.
+2. **API Rust:** `cd contexts/api`, exporte `DATABASE_URL` (p. ej. `postgresql://pqrs:pqrs@localhost:5433/pqrs?sslmode=disable`), opcional `REDIS_URL` y `EMBEDDING_URL` si usa búsqueda semántica; ejecute `cargo run`.
+3. **Frontend:** `cd contexts/presentation`, cree `.env.local` con `NEXT_PUBLIC_API_URL=http://127.0.0.1:8080` y ejecute `npm run dev`; abra `http://localhost:3000`.
+
+**Capturas sugeridas (4 vistas):** `/gestion` (validación + banner de alertas), `/historial`, `/dashboard`, `/banco-qa`.
+
 ---
 
 ## Requisitos
