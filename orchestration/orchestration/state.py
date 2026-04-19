@@ -34,3 +34,5 @@ class AgentState(TypedDict, total=False):
     pipeline_done: bool
     outcome: str
     error: str
+    # Tras persistencia OLTP (LoadToWarehouse): siempre pendiente de validación humana (Ley 1755).
+    validation_status: str

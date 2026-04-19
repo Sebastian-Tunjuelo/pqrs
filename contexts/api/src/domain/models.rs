@@ -16,6 +16,7 @@ pub struct PqrsListItem {
     pub nivel_riesgo: Option<String>,
     pub territorio_id: Option<i32>,
     pub confianza_clasificacion: Option<f64>,
+    pub validation_status: String,
 }
 
 #[derive(Debug, Serialize, FromRow)]
@@ -36,6 +37,7 @@ pub struct PqrsDetail {
     pub metadata: Option<serde_json::Value>,
     pub created_at: Option<DateTime<Utc>>,
     pub updated_at: Option<DateTime<Utc>>,
+    pub validation_status: String,
 }
 
 #[derive(Debug, Serialize, FromRow)]

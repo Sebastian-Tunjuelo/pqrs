@@ -69,7 +69,8 @@ async fn load_pqrs(pool: &sqlx::PgPool, id: Uuid) -> Result<PqrsDetail, ApiError
             p.razon_rechazo,
             p.metadata,
             p.created_at,
-            p.updated_at
+            p.updated_at,
+            p.validation_status::text AS validation_status
         FROM pqrs p
         WHERE p.id = $1
         "#,

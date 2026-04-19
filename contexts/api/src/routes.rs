@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, post},
+    routing::{get, patch, post},
     Router,
 };
 
@@ -17,10 +17,15 @@ pub fn api_v1_router(state: AppState) -> Router {
         .route("/pqrs/gestion/pendientes", get(pqrs::gestion_pendientes))
         .route("/pqrs/pendientes/prioridad", get(pqrs::pendientes_prioridad))
         .route(
+            "/pqrs/pending-validation",
+            get(pqrs::pending_validation),
+        )
+        .route(
             "/assist/ollama/explicar-rechazo",
             post(assist::explicar_rechazo),
         )
         .route("/assist/ollama/mensaje-gestion", post(assist::mensaje_gestion))
+        .route("/pqrs/:id/validate", patch(pqrs::validate_pqrs))
         .route("/pqrs/:id", get(pqrs::get_pqrs))
         .route("/dashboard/territorios", get(dashboard::territorios))
         .route("/dashboard/metricas", get(dashboard::metricas))

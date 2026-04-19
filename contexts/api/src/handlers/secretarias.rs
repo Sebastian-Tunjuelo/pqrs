@@ -73,7 +73,8 @@ pub async fn pqrs_por_secretaria(
             p.estado_gestion,
             p.nivel_riesgo,
             p.territorio_id,
-            p.confianza_clasificacion::float8 AS confianza_clasificacion
+            p.confianza_clasificacion::float8 AS confianza_clasificacion,
+            p.validation_status::text AS validation_status
         FROM pqrs p
         INNER JOIN pqrs_secretaria ps ON ps.pqrs_id = p.id AND ps.secretaria_codigo = $1
         ORDER BY p.fecha_radicado DESC

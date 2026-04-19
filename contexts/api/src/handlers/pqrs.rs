@@ -9,6 +9,28 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 #[derive(Debug, serde::Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ValidateAction {
+    Validate,
+    Reject,
+    RequestCorrection,
+}
+
+#[derive(Debug, serde::Deserialize)]
+pub struct ValidatePqrsBody {
+    pub action: ValidateAction,
+    pub officer_id: String,
+    pub correction_note: Option<String>,
+    pub override_secretaria: Option<String>,
+}
+
+#[derive(Debug, serde::Serialize)]
+pub struct ValidatePqrsResponse {
+    pub id: Uuid,
+    pub validation_status: String,
+}
+
+#[derive(Debug, serde::Deserialize)]
 pub struct PageQuery {
     #[serde(default = "default_page")]
     pub page: u32,
@@ -36,7 +58,8 @@ SELECT
     p.estado_gestion,
     p.nivel_riesgo,
     p.territorio_id,
-    p.confianza_clasificacion::float8 AS confianza_clasificacion
+    p.confianza_clasificacion::float8 AS confianza_clasificacion,
+    p.validation_status::text AS validation_status
 FROM pqrs p
 "#;
 
@@ -108,7 +131,8 @@ pub async fn get_pqrs(
             p.razon_rechazo,
             p.metadata,
             p.created_at,
-            p.updated_at
+            p.updated_at,
+            p.validation_status::text AS validation_status
         FROM pqrs p
         WHERE p.id = $1
         "#,
@@ -205,4 +229,145 @@ pub async fn pendientes_prioridad(
     )
     .await?;
     Ok(Json(data))
+}
+
+pub async fn pending_validation(
+    State(state): State<AppState>,
+    Query(q): Query<PageQuery>,
+) -> Result<Json<Paginated<PqrsListItem>>, ApiError> {
+    let data = pqrs_paginated(
+        &state.pool,
+        "WHERE p.validation_status = 'PENDING_VALIDATION' AND p.estado_clasificacion = 'ACEPTADA'",
+        "ORDER BY p.fecha_limite ASC NULLS LAST, p.fecha_radicado ASC",
+        q.page,
+        q.per_page,
+    )
+    .await?;
+    Ok(Json(data))
+}
+
+pub async fn validate_pqrs(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+    Json(body): Json<ValidatePqrsBody>,
+) -> Result<Json<ValidatePqrsResponse>, ApiError> {
+    if body.officer_id.trim().is_empty() {
+        return Err(ApiError::bad_request("officer_id es obligatorio"));
+    }
+
+    let new_status = match body.action {
+        ValidateAction::Validate => "VALIDATED",
+        ValidateAction::Reject => "REJECTED_BY_OFFICER",
+        ValidateAction::RequestCorrection => "CORRECTION_REQUESTED",
+    };
+
+    let mut tx = state.pool.begin().await?;
+
+    let current: Option<String> = sqlx::query_scalar(
+        "SELECT validation_status::text FROM pqrs WHERE id = $1 FOR UPDATE",
+    )
+    .bind(id)
+    .fetch_optional(&mut *tx)
+    .await?;
+
+    let Some(prev) = current else {
+        return Err(ApiError::not_found("PQRS no encontrada"));
+    };
+
+    if prev != "PENDING_VALIDATION" && prev != "CORRECTION_REQUESTED" {
+        return Err(ApiError::bad_request(
+            "Solo se puede validar/rechazar/solicitar corrección cuando la PQRS está pendiente de validación o en corrección",
+        ));
+    }
+
+    let action_label = match body.action {
+        ValidateAction::Validate => "VALIDATE",
+        ValidateAction::Reject => "REJECT",
+        ValidateAction::RequestCorrection => "REQUEST_CORRECTION",
+    };
+    let nota = if let Some(n) = body.correction_note.as_ref().map(|s| s.trim()).filter(|s| !s.is_empty()) {
+        format!("Acción: {action_label}. {n}")
+    } else {
+        format!("Acción: {action_label}")
+    };
+
+    let oid = body.officer_id.trim();
+    let actor_short: String = oid.chars().take(50).collect();
+
+    sqlx::query(
+        r#"
+        INSERT INTO pqrs_historial (pqrs_id, estado_anterior, estado_nuevo, actor, officer_id, nota)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        "#,
+    )
+    .bind(id)
+    .bind(&prev)
+    .bind(new_status)
+    .bind(&actor_short)
+    .bind(oid)
+    .bind(&nota)
+    .execute(&mut *tx)
+    .await?;
+
+    sqlx::query(
+        r#"
+        UPDATE pqrs
+        SET validation_status = $1::validation_status,
+            updated_at = NOW()
+        WHERE id = $2
+        "#,
+    )
+    .bind(new_status)
+    .bind(id)
+    .execute(&mut *tx)
+    .await?;
+
+    if let Some(ref codigo) = body.override_secretaria {
+        let c = codigo.trim();
+        if !c.is_empty() {
+            let ok: bool = sqlx::query_scalar(
+                r#"SELECT EXISTS(
+                    SELECT 1 FROM dim_secretaria WHERE codigo = $1 AND (activa IS NULL OR activa = true)
+                )"#,
+            )
+            .bind(c)
+            .fetch_one(&mut *tx)
+            .await?;
+
+            if !ok {
+                return Err(ApiError::bad_request(format!(
+                    "Secretaría '{c}' no existe o está inactiva"
+                )));
+            }
+
+            sqlx::query("UPDATE pqrs_secretaria SET es_lider = false WHERE pqrs_id = $1")
+                .bind(id)
+                .execute(&mut *tx)
+                .await?;
+
+            sqlx::query(
+                r#"
+                INSERT INTO pqrs_secretaria (pqrs_id, secretaria_codigo, es_lider, score, motivo)
+                VALUES ($1, $2, true, 1.00, $3)
+                ON CONFLICT (pqrs_id, secretaria_codigo) DO UPDATE
+                SET es_lider = true, score = 1.00, motivo = EXCLUDED.motivo
+                "#,
+            )
+            .bind(id)
+            .bind(c)
+            .bind(format!(
+                "Ruteo corregido por funcionario {} (override manual)",
+                body.officer_id.trim()
+            ))
+            .execute(&mut *tx)
+            .await?;
+        }
+    }
+
+    tx.commit().await?;
+
+    Ok(Json(ValidatePqrsResponse {
+        id,
+        validation_status: new_status.to_string(),
+    }))
 }

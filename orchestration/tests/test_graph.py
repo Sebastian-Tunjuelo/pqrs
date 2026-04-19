@@ -79,6 +79,7 @@ async def test_pipeline_happy_path() -> None:
     out = await app.ainvoke({"raw_event": _ingested_payload()})
     assert out.get("outcome") == "completed"
     assert out.get("warehouse_ok") is True
+    assert out.get("validation_status") == "PENDING_VALIDATION"
     assert out.get("routing_secretaria_lider") == "SGH"
     clf.execute.assert_awaited_once()
     pr.execute.assert_awaited_once()

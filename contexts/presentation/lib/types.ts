@@ -10,6 +10,8 @@ export type PqrsListItem = {
   nivel_riesgo: string | null;
   territorio_id: number | null;
   confianza_clasificacion: number | null;
+  /** Cola de validación humana (API ≥ migración 002). */
+  validation_status?: string;
 };
 
 /** Respuesta de `GET /api/v1/pqrs/:id` (API Rust). */
@@ -30,6 +32,7 @@ export type PqrsDetail = {
   metadata: unknown | null;
   created_at: string | null;
   updated_at: string | null;
+  validation_status?: string;
 };
 
 export type Paginated<T> = {

@@ -105,12 +105,13 @@ async def reject_node(state: AgentState) -> dict[str, Any]:
 
 
 async def warehouse_node(state: AgentState) -> dict[str, Any]:
-    # Persistencia OLAP vía job batch / API; el grafo solo marca etapa.
+    """Marca fin de pipeline; cualquier persistencia OLTP debe dejar `PENDING_VALIDATION`."""
     _ = state.get("pqrs_id")
     return {
         "warehouse_ok": True,
         "pipeline_done": True,
         "outcome": "completed",
+        "validation_status": "PENDING_VALIDATION",
     }
 
 
