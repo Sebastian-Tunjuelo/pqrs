@@ -34,7 +34,7 @@ Hace: Compose → espera Postgres → Alembic → seeds `dim_*` → **banco Q&A*
 scripts\seed_banco_qa.cmd
 ```
 
-**Asistente Ollama en la API:** tras cambios en `contexts/api`, recompile y reinicie la API (`scripts\build_api_windows.cmd build` o `cargo build`). Ollama debe estar arriba (`docker compose up -d`) y el modelo descargado (`docker compose exec ollama ollama pull llama3.2:3b`). Variables opcionales: `OLLAMA_URL` (p. ej. `http://127.0.0.1:11434`), `OLLAMA_MODEL`.
+**Asistente Ollama (Next.js):** la UI usa la ruta interna **`/api/assist/ollama`** (lee la PQRS en la API Rust y habla con Ollama). No hace falta recompilar la API solo por el asistente; sí hace falta **Ollama arriba** y el modelo (`docker compose exec ollama ollama pull llama3.2:3b`). En `contexts/presentation/.env.local` puede definir `API_URL`, `OLLAMA_URL` y `OLLAMA_MODEL` (ver `.env.example`).
 
 ---
 

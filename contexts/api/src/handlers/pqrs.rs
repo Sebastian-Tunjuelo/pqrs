@@ -47,7 +47,7 @@ async fn pqrs_paginated(
     page: u32,
     per_page: u32,
 ) -> Result<Paginated<PqrsListItem>, ApiError> {
-    let per = per_page.clamp(1, 100) as i64;
+    let per = per_page.clamp(1, 500) as i64;
     let page = page.max(1);
     let offset = (page - 1) as i64 * per;
 

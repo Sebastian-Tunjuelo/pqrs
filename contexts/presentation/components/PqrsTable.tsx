@@ -15,11 +15,14 @@ function fmtDate(iso: string | null): string {
 export function PqrsTable({
   title,
   items,
-  emptyMessage
+  emptyMessage,
+  scrollable
 }: {
   title: string;
   items: PqrsListItem[];
   emptyMessage?: string;
+  /** Lista larga: scroll vertical dentro de la tarjeta. */
+  scrollable?: boolean;
 }) {
   if (!items.length) {
     return (
@@ -34,9 +37,17 @@ export function PqrsTable({
     <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-4 py-3">
         <h2 className="text-base font-semibold text-slate-800">{title}</h2>
-        <p className="text-xs text-slate-500">{items.length} en esta página</p>
+        <p className="text-xs text-slate-500">
+          {items.length} registro{items.length === 1 ? "" : "s"}
+        </p>
       </div>
-      <div className="overflow-x-auto">
+      <div
+        className={
+          scrollable
+            ? "max-h-[min(32rem,70vh)] overflow-y-auto overflow-x-auto"
+            : "overflow-x-auto"
+        }
+      >
         <table className="min-w-full text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>

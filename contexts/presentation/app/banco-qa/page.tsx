@@ -2,10 +2,12 @@ import { BancoQaSearch } from "@/components/BancoQaSearch";
 import { apiGetServer } from "@/lib/api";
 import type { BancoQaRow } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function BancoQaPage() {
   let rows: BancoQaRow[];
   try {
-    rows = await apiGetServer<BancoQaRow[]>("/api/v1/banco-qa");
+    rows = await apiGetServer<BancoQaRow[]>("/api/v1/banco-qa", 0);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error desconocido";
     return (

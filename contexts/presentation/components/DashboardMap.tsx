@@ -15,27 +15,6 @@ export type EstadoComuna = {
   vencidas: number;
 };
 
-/** Prioridad para desempate: peor estado operativo primero. */
-function categoriaDominante(e: EstadoComuna): "vencida" | "pendiente" | "tramite" | "respondida" | "sin_datos" {
-  const { pendientes, en_tramite, respondidas, vencidas } = e;
-  const orden: Array<["vencida" | "pendiente" | "tramite" | "respondida", number]> = [
-    ["vencida", vencidas],
-    ["pendiente", pendientes],
-    ["tramite", en_tramite],
-    ["respondida", respondidas]
-  ];
-  let mejor: (typeof orden)[0][0] | "sin_datos" = "sin_datos";
-  let nMax = -1;
-  for (const [cat, n] of orden) {
-    if (n > nMax) {
-      nMax = n;
-      mejor = cat;
-    }
-  }
-  if (nMax <= 0) return "sin_datos";
-  return mejor;
-}
-
 /** Escala azul por volumen (cuando hay PQRS pero sin buckets de gestión conocidos). */
 function colorSoloVolumen(n: number, maxN: number): string {
   if (maxN <= 0 || n <= 0) return "#e2e8f0";
@@ -46,28 +25,24 @@ function colorSoloVolumen(n: number, maxN: number): string {
   return `hsl(${h} ${s}% ${l}%)`;
 }
 
-/** Color por estado de gestión dominante; intensidad según volumen vs máximo en el mapa. */
-function colorPorEstado(
-  categoria: ReturnType<typeof categoriaDominante>,
-  n: number,
-  maxN: number
-): string {
+/**
+ * Color por mezcla de estados en la comuna (no solo el mayor conteo).
+ * Más rojo: más vencidas / carga pendiente y trámite; más verde: más respondidas.
+ */
+function colorPorSaludOperativa(est: EstadoComuna, n: number, maxN: number): string {
   if (n <= 0 || maxN <= 0) return "#e2e8f0";
-  if (categoria === "sin_datos") return colorSoloVolumen(n, maxN);
+  const sum = est.pendientes + est.en_tramite + est.respondidas + est.vencidas;
+  if (sum <= 0) return colorSoloVolumen(n, maxN);
+  const tension = est.vencidas * 4 + est.pendientes * 1.15 + est.en_tramite * 1.75;
+  const alivio = est.respondidas * 2.4;
+  let score = (tension - alivio) / sum;
+  score = Math.max(-1.15, Math.min(2.6, score));
+  const norm = (score + 1.15) / 3.75;
+  const hue = 118 - norm * 118;
   const t = Math.min(1, n / maxN);
-  const l = 88 - t * 42;
-  switch (categoria) {
-    case "vencida":
-      return `hsl(0 72% ${l}%)`;
-    case "pendiente":
-      return `hsl(214 78% ${l}%)`;
-    case "tramite":
-      return `hsl(38 92% ${Math.max(38, l - 6)}%)`;
-    case "respondida":
-      return `hsl(152 55% ${l}%)`;
-    default:
-      return "#e2e8f0";
-  }
+  const l = 84 - t * 40;
+  const s = 52 + t * 22;
+  return `hsl(${hue.toFixed(0)} ${s.toFixed(0)}% ${l.toFixed(0)}%)`;
 }
 
 export default function DashboardMap({
@@ -114,9 +89,8 @@ export default function DashboardMap({
         respondidas: 0,
         vencidas: 0
       };
-      const cat = categoriaDominante(est);
       return {
-        fillColor: colorPorEstado(cat, n, maxCount),
+        fillColor: colorPorSaludOperativa(est, n, maxCount),
         color: "#64748b",
         weight: 1,
         fillOpacity: 0.88
@@ -135,21 +109,15 @@ export default function DashboardMap({
         respondidas: 0,
         vencidas: 0
       };
-      const cat = categoriaDominante(est);
-      const catLabel =
-        cat === "sin_datos"
-          ? n <= 0
-            ? "Sin PQRS"
-            : "PQRS sin estado de gestión reconocido (color = volumen)"
-          : cat === "vencida"
-            ? "Predomina: vencidas"
-            : cat === "pendiente"
-              ? "Predomina: pendientes"
-              : cat === "tramite"
-                ? "Predomina: en trámite"
-                : "Predomina: respondidas";
+      const sum = est.pendientes + est.en_tramite + est.respondidas + est.vencidas;
+      const mixLabel =
+        n <= 0
+          ? "Sin PQRS"
+          : sum <= 0
+            ? "Color por volumen (gestión no clasificada en P/E/R/V)"
+            : "Color = mezcla operativa (rojo tensión, verde avance)";
       layer.bindPopup(
-        `<strong>${name}</strong><br/>Código: ${code}<br/>PQRS: <b>${n}</b><br/><small>${catLabel}<br/>` +
+        `<strong>${name}</strong><br/>Código: ${code}<br/>PQRS: <b>${n}</b><br/><small>${mixLabel}<br/>` +
           `Pend: ${est.pendientes} · Trámite: ${est.en_tramite} · Resp: ${est.respondidas} · Venc: ${est.vencidas}</small>`
       );
     };
@@ -178,24 +146,15 @@ export default function DashboardMap({
       <div className="border-b border-slate-100 px-4 py-3">
         <h2 className="text-base font-semibold text-slate-800">Mapa por comuna</h2>
         <p className="text-xs text-slate-500">
-          Color según el estado de gestión predominante; intensidad según cantidad de PQRS en la comuna.
+          Color por <strong>mezcla</strong> de estados en la comuna (vencidas y carga abren hacia rojo; respondidas hacia
+          verde). La intensidad refleja también cuántas PQRS hay en la comuna.
         </p>
         <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-600">
           <li className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "hsl(0 72% 55%)" }} />
-            Vencidas
-          </li>
-          <li className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "hsl(214 78% 55%)" }} />
-            Pendientes
-          </li>
-          <li className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "hsl(38 92% 52%)" }} />
-            En trámite
-          </li>
-          <li className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "hsl(152 55% 50%)" }} />
-            Respondidas
+            <span
+              className="inline-block h-2.5 w-8 rounded-sm bg-gradient-to-r from-red-500 via-amber-300 to-emerald-500"
+            />
+            Peor situación → mejor situación
           </li>
           <li className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-sm bg-slate-200" />
@@ -203,7 +162,7 @@ export default function DashboardMap({
           </li>
           <li className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: "hsl(210 70% 58%)" }} />
-            Solo volumen (gestión NULL u otro valor)
+            Solo volumen (sin P/E/R/V en BD)
           </li>
         </ul>
       </div>

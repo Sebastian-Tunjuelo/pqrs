@@ -1,14 +1,16 @@
 import { PqrsTable } from "@/components/PqrsTable";
-import { apiGetServer } from "@/lib/api";
-import type { Paginated, PqrsListItem } from "@/lib/types";
+import { apiGetServerAllPqrs } from "@/lib/api";
+import type { PqrsListItem } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 
 export default async function HistorialPage() {
-  let aceptadas: Paginated<PqrsListItem>;
-  let rechazadas: Paginated<PqrsListItem>;
+  let aceptadas: { items: PqrsListItem[]; total: number };
+  let rechazadas: { items: PqrsListItem[]; total: number };
   try {
     [aceptadas, rechazadas] = await Promise.all([
-      apiGetServer<Paginated<PqrsListItem>>("/api/v1/pqrs/historial/aceptadas?page=1&per_page=20"),
-      apiGetServer<Paginated<PqrsListItem>>("/api/v1/pqrs/historial/rechazadas?page=1&per_page=20")
+      apiGetServerAllPqrs("/api/v1/pqrs/historial/aceptadas"),
+      apiGetServerAllPqrs("/api/v1/pqrs/historial/rechazadas")
     ]);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error desconocido";
@@ -27,24 +29,30 @@ export default async function HistorialPage() {
     );
   }
 
+  const suma = aceptadas.total + rechazadas.total;
+
   return (
     <main className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Historial</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Clasificación aceptada vs. rechazos (ofensivo / no entendible). Total aceptadas:{" "}
-          <strong>{aceptadas.total}</strong>, rechazadas: <strong>{rechazadas.total}</strong>.
+          Listado completo cargado desde la API (paginación automática). Aceptadas:{" "}
+          <strong>{aceptadas.total}</strong> ({aceptadas.items.length} filas), rechazadas:{" "}
+          <strong>{rechazadas.total}</strong> ({rechazadas.items.length} filas). Suma clasificada:{" "}
+          <strong>{suma}</strong>.
         </p>
       </div>
       <PqrsTable
-        title="Aceptadas"
+        title="Aceptadas (listado completo)"
         items={aceptadas.items}
-        emptyMessage="No hay PQRS aceptadas en la primera página."
+        scrollable
+        emptyMessage="No hay PQRS aceptadas."
       />
       <PqrsTable
-        title="Rechazadas"
+        title="Rechazadas (listado completo)"
         items={rechazadas.items}
-        emptyMessage="No hay PQRS rechazadas en la primera página."
+        scrollable
+        emptyMessage="No hay PQRS rechazadas."
       />
     </main>
   );

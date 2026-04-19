@@ -3,13 +3,41 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { apiFetch, apiPostJson } from "@/lib/api";
-import type { AssistOllamaReply, Paginated, PqrsListItem } from "@/lib/types";
+import type { AssistMode } from "@/lib/assistOllama";
+import { apiFetchAllPqrsList, apiPostAssist } from "@/lib/api";
+import type { AssistOllamaReply, PqrsListItem } from "@/lib/types";
 
-type Tab = "rechazo" | "gestion";
+const TABS: { id: AssistMode; label: string; hint: string }[] = [
+  {
+    id: "clasificacion",
+    label: "Clasificación",
+    hint: "Por qué está aceptada, rechazada o pendiente de clasificación (y la confianza)."
+  },
+  {
+    id: "riesgo",
+    label: "Riesgo",
+    hint: "Por qué el nivel de riesgo (BAJO/MEDIO/ALTO/CRÍTICO) y qué implica para plazos y prioridad."
+  },
+  {
+    id: "rechazo",
+    label: "Rechazo",
+    hint: "Enfocado en rechazos ofensivo / no entendible y la razón registrada."
+  },
+  {
+    id: "gestion",
+    label: "Mensaje gestión",
+    hint: "Borrador interno para el equipo de gestión."
+  }
+];
 
-export function AsistentePanel({ initialTab }: { initialTab?: Tab }) {
-  const [tab, setTab] = useState<Tab>(initialTab === "gestion" ? "gestion" : "rechazo");
+export function AsistentePanel({ initialTab }: { initialTab?: AssistMode }) {
+  const validInitial =
+    initialTab && TABS.some((t) => t.id === initialTab) ? initialTab : ("rechazo" as AssistMode);
+  const [tab, setTab] = useState<AssistMode>(validInitial);
+
+  useEffect(() => {
+    if (initialTab && TABS.some((t) => t.id === initialTab)) setTab(initialTab);
+  }, [initialTab]);
   const [items, setItems] = useState<PqrsListItem[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [listErr, setListErr] = useState<string | null>(null);
@@ -24,24 +52,22 @@ export function AsistentePanel({ initialTab }: { initialTab?: Tab }) {
     setListErr(null);
     setLoadingList(true);
     try {
-      let data: Paginated<PqrsListItem>;
+      let rows: PqrsListItem[];
       let usaTodas = false;
       if (tab === "rechazo") {
-        data = await apiFetch<Paginated<PqrsListItem>>(
-          "/api/v1/pqrs/historial/rechazadas?page=1&per_page=80"
-        );
-        if (data.items.length === 0) {
-          data = await apiFetch<Paginated<PqrsListItem>>("/api/v1/pqrs?page=1&per_page=80");
+        rows = await apiFetchAllPqrsList("/api/v1/pqrs/historial/rechazadas");
+        if (rows.length === 0) {
+          rows = await apiFetchAllPqrsList("/api/v1/pqrs");
           usaTodas = true;
         }
       } else {
-        data = await apiFetch<Paginated<PqrsListItem>>("/api/v1/pqrs?page=1&per_page=80");
+        rows = await apiFetchAllPqrsList("/api/v1/pqrs");
       }
       setRechazoUsaTodas(usaTodas);
-      setItems(data.items);
+      setItems(rows);
       setSelectedId((id) => {
-        if (id && data.items.some((x) => x.id === id)) return id;
-        return data.items[0]?.id ?? "";
+        if (id && rows.some((x) => x.id === id)) return id;
+        return rows[0]?.id ?? "";
       });
     } catch (e) {
       setListErr(e instanceof Error ? e.message : "Error al cargar PQRS");
@@ -66,11 +92,7 @@ export function AsistentePanel({ initialTab }: { initialTab?: Tab }) {
     }
     setLoading(true);
     try {
-      const path =
-        tab === "rechazo"
-          ? "/api/v1/assist/ollama/explicar-rechazo"
-          : "/api/v1/assist/ollama/mensaje-gestion";
-      const r = await apiPostJson<AssistOllamaReply>(path, { pqrs_id: selectedId });
+      const r = await apiPostAssist<AssistOllamaReply>({ pqrs_id: selectedId, mode: tab });
       setOut(r.respuesta);
       setModelo(r.modelo);
     } catch (e) {
@@ -80,39 +102,31 @@ export function AsistentePanel({ initialTab }: { initialTab?: Tab }) {
     }
   }
 
+  const tabMeta = TABS.find((t) => t.id === tab);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
-        <button
-          type="button"
-          onClick={() => setTab("rechazo")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium ${
-            tab === "rechazo"
-              ? "bg-brand-600 text-white shadow"
-              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-          }`}
-        >
-          Por qué rechazo (Ollama)
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab("gestion")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium ${
-            tab === "gestion"
-              ? "bg-brand-600 text-white shadow"
-              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-          }`}
-        >
-          Mensaje para gestión
-        </button>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={`rounded-lg px-3 py-2 text-sm font-medium ${
+              tab === t.id
+                ? "bg-brand-600 text-white shadow"
+                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       <p className="text-sm text-slate-600">
-        {tab === "rechazo"
-          ? rechazoUsaTodas
-            ? "No hay rechazadas en la muestra: se listan PQRS generales. Ollama usa texto, estado de clasificación y razón de rechazo si existe."
-            : "Lista de PQRS con clasificación rechazada. Ollama usa el texto, el estado y la razón registrada en base de datos."
-          : "Cualquier PQRS reciente: se redacta un borrador interno para el equipo de gestión (requiere Ollama en marcha, p. ej. Docker)."}
+        {tab === "rechazo" && rechazoUsaTodas
+          ? "No hay rechazadas: se listan todas las PQRS. Puede usar pestaña Clasificación o Riesgo para cualquier caso."
+          : tabMeta?.hint}
       </p>
 
       {listErr && (
@@ -122,7 +136,7 @@ export function AsistentePanel({ initialTab }: { initialTab?: Tab }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1">
           <label htmlFor="pqrs-pick" className="mb-1 block text-xs font-medium text-slate-600">
-            PQRS
+            PQRS ({items.length} cargadas)
           </label>
           <select
             id="pqrs-pick"
@@ -147,7 +161,7 @@ export function AsistentePanel({ initialTab }: { initialTab?: Tab }) {
           onClick={() => void runAssist()}
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-brand-700 disabled:opacity-60"
         >
-          {loading ? "Consultando…" : tab === "rechazo" ? "Preguntar a Ollama" : "Generar borrador"}
+          {loading ? "Consultando Ollama…" : "Consultar Ollama"}
         </button>
       </div>
 
@@ -163,9 +177,12 @@ export function AsistentePanel({ initialTab }: { initialTab?: Tab }) {
       )}
 
       <p className="text-xs text-slate-500">
-        Variables de entorno en la API:{" "}
-        <code className="rounded bg-slate-100 px-1">OLLAMA_URL</code> (default{" "}
-        <code className="rounded bg-slate-100 px-1">http://127.0.0.1:11434</code>) y{" "}
+        El asistente corre en <strong>Next.js</strong> (<code className="rounded bg-slate-100 px-1">/api/assist/ollama</code>
+        ): lee la PQRS en la API Rust y llama a Ollama. Configure en <code className="rounded bg-slate-100 px-1">.env.local</code>{" "}
+        del frontend:{" "}
+        <code className="rounded bg-slate-100 px-1">API_URL</code> (servidor → API Rust, ej.{" "}
+        <code className="rounded bg-slate-100 px-1">http://127.0.0.1:8080</code>),{" "}
+        <code className="rounded bg-slate-100 px-1">OLLAMA_URL</code>,{" "}
         <code className="rounded bg-slate-100 px-1">OLLAMA_MODEL</code>.{" "}
         <Link href="/gestion" className="text-brand-700 underline">
           Volver a gestión
