@@ -24,10 +24,21 @@ import hashlib
 import json
 import os
 import random
+import sys
 import uuid
 from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
 
 import psycopg
+
+_ROOT = Path(__file__).resolve().parents[1]
+_prio = _ROOT / "contexts" / "prioritization"
+if str(_prio) not in sys.path:
+    sys.path.insert(0, str(_prio))
+
+from prioritization.infrastructure.calendario_colombia import (  # noqa: E402
+    fecha_limite_dias_habiles,
+)
 
 DEMO_FLAG = {"demo": True}
 
@@ -112,6 +123,20 @@ def _contenido_ofensivo(i: int, id_ext: str) -> str:
     ]
     cuerpo = variantes[i % len(variantes)]
     return f"{cuerpo}\n\nIdentificador demo: {id_ext}."
+
+
+def _validation_status_demo(i: int, estado_clf: str) -> str:
+    """Reparto pedido en P8 sobre filas aceptadas; el resto queda pendiente de validación."""
+    if estado_clf != ACEPTADA:
+        return "PENDING_VALIDATION"
+    r = (i - 1) % 200
+    if r < 50:
+        return "PENDING_VALIDATION"
+    if r < 150:
+        return "VALIDATED"
+    if r < 180:
+        return "REJECTED_BY_OFFICER"
+    return "CORRECTION_REQUESTED"
 
 
 def _clasificacion_por_indice(i: int) -> str:
@@ -217,7 +242,14 @@ def main() -> int:
                     lon = -75.58 + rng.random() * 0.06
                     lat = 6.22 + rng.random() * 0.08
                     rad = datetime.now(UTC) - timedelta(days=rng.randint(0, 120))
-                    lim = date.today() + timedelta(days=rng.randint(5, 60)) if estado_clf == ACEPTADA else None
+                    if estado_clf == ACEPTADA:
+                        hoy = date.today()
+                        if i <= 12 and _validation_status_demo(i, estado_clf) == "PENDING_VALIDATION":
+                            lim = fecha_limite_dias_habiles(hoy, 3)
+                        else:
+                            lim = hoy + timedelta(days=rng.randint(5, 60))
+                    else:
+                        lim = None
 
                     meta = {
                         **DEMO_FLAG,
@@ -229,19 +261,23 @@ def main() -> int:
                         ),
                     }
 
+                    vstat = _validation_status_demo(i, estado_clf)
+
                     cur.execute(
                         """
                         INSERT INTO pqrs (
                           id, id_externo, tipo, contenido, contenido_hash,
                           fecha_radicado, fecha_limite, estado_clasificacion,
                           estado_gestion, nivel_riesgo, territorio_id, punto_geo,
-                          confianza_clasificacion, razon_rechazo, metadata
+                          confianza_clasificacion, razon_rechazo, metadata,
+                          validation_status
                         ) VALUES (
                           %(id)s, %(ext)s, %(tipo)s, %(cont)s, %(hash)s,
                           %(rad)s, %(lim)s, %(eclf)s,
                           %(eges)s, %(riesgo)s, %(tid)s,
                           ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326),
-                          %(conf)s, %(razon)s, %(meta)s::jsonb
+                          %(conf)s, %(razon)s, %(meta)s::jsonb,
+                          %(vstat)s::validation_status
                         )
                         """,
                         {
@@ -261,6 +297,7 @@ def main() -> int:
                             "conf": conf,
                             "razon": razon,
                             "meta": json.dumps(meta),
+                            "vstat": vstat,
                         },
                     )
                     if estado_clf == ACEPTADA and rng.random() < 0.92:
