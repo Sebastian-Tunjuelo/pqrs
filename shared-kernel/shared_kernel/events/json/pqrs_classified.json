@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqrs-medellin.local/schemas/pqrs_classified.json",
+  "title": "PqrsClassified",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_type",
+    "version",
+    "occurred_at",
+    "pqrs_id",
+    "estado_clasificacion"
+  ],
+  "properties": {
+    "event_type": { "const": "PqrsClassified" },
+    "version": { "const": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "pqrs_id": { "type": "string", "format": "uuid" },
+    "estado_clasificacion": {
+      "type": "string",
+      "enum": [
+        "PENDIENTE",
+        "ACEPTADA",
+        "RECHAZADA_OFENSIVO",
+        "RECHAZADA_NO_ENTENDIBLE"
+      ]
+    },
+    "tipo": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "enum": ["P", "Q", "R", "S", "D"] }
+      ]
+    },
+    "confianza": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "razon_rechazo": { "type": ["string", "null"] },
+    "palabras_detectadas": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pqrs-medellin.local/schemas/pqrs_prioritized.json",
+  "title": "PqrsPrioritized",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_type",
+    "version",
+    "occurred_at",
+    "pqrs_id",
+    "nivel_riesgo",
+    "sla_dias_habiles",
+    "fecha_limite"
+  ],
+  "properties": {
+    "event_type": { "const": "PqrsPrioritized" },
+    "version": { "const": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "pqrs_id": { "type": "string", "format": "uuid" },
+    "nivel_riesgo": {
+      "type": "string",
+      "enum": ["CRITICO", "ALTO", "MEDIO", "BAJO"]
+    },
+    "sla_dias_habiles": { "type": "integer", "minimum": 1, "maximum": 365 },
+    "fecha_limite": { "type": "string", "format": "date" },
+    "factores_riesgo": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "justificacion": { "type": ["string", "null"] }
+  }
+}

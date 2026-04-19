@@ -1,0 +1,65 @@
+# Catálogo semilla para la tabla `banco_qa` (PQRS Medellín).
+# Cargar con: python -m banco_qa.cli seed --file glosarios/banco_qa.yaml
+version: 1
+entries:
+  - pregunta: "¿Qué es una PQRS?"
+    respuesta: >
+      PQRS son Peticiones, Quejas, Reclamos y Sugerencias. Es el canal oficial
+      para que la ciudadanía se comunique con la administración municipal sobre
+      trámites, servicios y participación.
+    secretaria_codigo: null
+    tags: ["conceptos", "ciudadanía"]
+
+  - pregunta: "¿Cuántos días hábiles tengo para una petición de información?"
+    respuesta: >
+      Según la Ley 1755 de 2015, las peticiones de documentos e información suelen
+      atenderse en plazos de 10 días hábiles; otras peticiones pueden tener 15 días
+      hábiles. Los plazos exactos dependen del tipo de solicitud y del riesgo asociado.
+    secretaria_codigo: SGH
+    tags: ["ley 1755", "plazos", "información"]
+
+  - pregunta: "¿Dónde radico una PQRS en Medellín?"
+    respuesta: >
+      Puede hacerlo por canales digitales oficiales de la Alcaldía de Medellín o
+      presencialmente en puntos de atención habilitados. Verifique siempre el sitio
+      web institucional para enlaces vigentes y requisitos.
+    secretaria_codigo: SGH
+    tags: ["radicación", "canales"]
+
+  - pregunta: "¿Qué secretaría atiende temas de emprendimiento y negocios?"
+    respuesta: >
+      La Secretaría de Desarrollo Económico (SDE) orienta políticas de desarrollo
+      económico, emprendimiento y competitividad en el municipio.
+    secretaria_codigo: SDE
+    tags: ["secretarías", "economía"]
+
+  - pregunta: "¿Quién responde por salud pública municipal?"
+    respuesta: >
+      La Secretaría de Salud (SSA) es la dependencia competente en políticas de salud
+      pública y prestación de servicios de salud a nivel municipal, según su mandato.
+    secretaria_codigo: SSA
+    tags: ["salud", "secretarías"]
+
+  - pregunta: "¿Qué hago si mi PQRS fue clasificada como no entendible?"
+    respuesta: >
+      Redacte el texto con datos concretos (qué pasó, cuándo, dónde, qué solicita).
+      Evite mensajes demasiado cortos o sin contexto. Si necesita orientación,
+      acérquese a atención ciudadana (SGH) para ayuda en el formulario.
+    secretaria_codigo: SGH
+    tags: ["clasificación", "rechazo"]
+
+  - pregunta: "¿Qué es una multidependencia en el ruteo de PQRS?"
+    respuesta: >
+      Cuando varias secretarías tienen competencias relacionadas con el mismo caso,
+      el sistema puede marcar multidependencia y proponer una secretaría líder con
+      coordinación entre dependencias.
+    secretaria_codigo: null
+    tags: ["ruteo", "secretarías"]
+
+  - pregunta: "¿Cómo se prioriza una PQRS con riesgo alto?"
+    respuesta: >
+      Se combinan factores de riesgo poblacional y personal definidos en glosarios
+      oficiales, reglas de la Ley 1755 y evaluación asistida; las PQRS de mayor
+      riesgo reciben plazos más exigentes y seguimiento prioritario.
+    secretaria_codigo: null
+    tags: ["riesgo", "priorización", "ley 1755"]

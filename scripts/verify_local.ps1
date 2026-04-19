@@ -1,0 +1,74 @@
+<#
+.SYNOPSIS
+    Prueba la pila local: Docker → Alembic → seeds SQL → demo 200 PQRS → (opcional) health API.
+
+.DESCRIPTION
+    Ejecutar desde la raíz del repo en PowerShell:
+        .\scripts\verify_local.ps1
+
+    Requisitos: Docker Desktop, Python 3.12+ (`py -3.12`), imagen postgis/postgis (primera vez: descarga grande).
+
+    No inicia la API Rust ni Next.js; al final indica cómo probarlos.
+#>
+$ErrorActionPreference = "Stop"
+$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+Set-Location $Root
+
+function Write-Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
+
+Write-Step "1. Docker Compose (postgres, redis, ollama)"
+docker compose -f (Join-Path $Root "docker-compose.yml") up -d
+
+Write-Step "2. Esperando Postgres (hasta ~120 s)"
+$ready = $false
+for ($i = 0; $i -lt 60; $i++) {
+    docker compose exec -T postgres pg_isready -U pqrs -d pqrs 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) { $ready = $true; break }
+    Start-Sleep -Seconds 2
+}
+if (-not $ready) {
+    Write-Error "Postgres no respondió. Revise Docker Desktop y volver a ejecutar."
+}
+
+Write-Step "3. Instalar warehouse + Alembic"
+py -3.12 -m pip install -q -e (Join-Path $Root "contexts\warehouse")
+
+$env:DATABASE_URL = "postgresql+psycopg://pqrs:pqrs@localhost:5433/pqrs"
+Push-Location (Join-Path $Root "contexts\warehouse")
+try {
+    py -3.12 -m alembic upgrade head
+} finally {
+    Pop-Location
+}
+
+Write-Step "4. Seeds dim_secretaria y dim_territorio (puede tardar si el SQL es grande)"
+Get-Content (Join-Path $Root "data\seed\seed_dim_secretaria.sql") -Raw |
+    docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
+Get-Content (Join-Path $Root "data\seed\seed_dim_territorio.sql") -Raw |
+    docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
+
+Write-Step "4b. Banco Q&A (tabla banco_qa)"
+Get-Content (Join-Path $Root "data\seed\seed_banco_qa.sql") -Raw |
+    docker compose exec -T postgres psql -U pqrs -d pqrs -v ON_ERROR_STOP=1
+
+Write-Step "5. Demo 200 PQRS sintéticas"
+$env:DATABASE_URL = "postgresql://pqrs:pqrs@localhost:5433/pqrs?sslmode=disable"
+py -3.12 -m pip install -q -r (Join-Path $Root "scripts\requirements-demo.txt")
+py -3.12 (Join-Path $Root "scripts\demo_seed_pqrs.py") --purge
+
+Write-Step "6. Comprobar API (opcional)"
+try {
+    $r = Invoke-WebRequest -Uri "http://127.0.0.1:8080/api/v1/health" -UseBasicParsing -TimeoutSec 3
+    Write-Host "API respondió: $($r.StatusCode) $($r.Content)" -ForegroundColor Green
+} catch {
+    Write-Host "API no está en 8080. Para probarla:" -ForegroundColor Yellow
+    Write-Host '  cd contexts\api' -ForegroundColor Gray
+    Write-Host '  set DATABASE_URL=postgresql://pqrs:pqrs@localhost:5433/pqrs?sslmode=disable' -ForegroundColor Gray
+    Write-Host '  cargo run' -ForegroundColor Gray
+}
+
+Write-Step "7. E2E (requiere API arriba)"
+Write-Host '  pip install -e .\e2e' -ForegroundColor Gray
+Write-Host '  py -3.12 -m pytest .\e2e\tests -q -m e2e' -ForegroundColor Gray
+
+Write-Host "`nListo: Postgres tiene esquema, dimensiones y ~200 PQRS demo." -ForegroundColor Green

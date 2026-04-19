@@ -1,0 +1,41 @@
+insultos_directos:
+  - hijueputa
+  - hp
+  - malparido
+  - gonorrea
+  - pirobo
+  - sapo
+  - cerdo
+  - rata
+  - basura humana
+  - estúpido
+  - imbécil
+  - idiota
+  - inútil
+  - bueno para nada
+
+amenazas:
+  - te voy a matar
+  - los voy a matar
+  - voy a quemar
+  - voy a volar
+  - me las vas a pagar
+  - atentado
+  - bomba
+  - acabar con todos
+
+discriminacion:
+  - negro de mierda
+  - indio hp
+  - marica (despectivo contextual)
+  - sidoso
+  - veneco (despectivo)
+  - gamín
+
+no_entendible:
+  min_caracteres: 20
+  patrones_rechazo:
+    - solo_emojis
+    - solo_numeros
+    - repeticion_letras
+    - sin_verbo_principal
