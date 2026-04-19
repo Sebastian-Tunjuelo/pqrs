@@ -20,7 +20,7 @@ export function GestionValidacion({ initial }: Props) {
   const [selected, setSelected] = useState<PqrsListItem | null>(items[0] ?? null);
   const [detail, setDetail] = useState<PqrsDetail | null>(null);
   const [summary, setSummary] = useState<PqrsSummaryResponse | null>(null);
-  const [tab, setTab] = useState<"resumen" | "pre" | "original">("resumen");
+  const [tab, setTab] = useState<"resumen" | "original">("resumen");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -100,7 +100,7 @@ export function GestionValidacion({ initial }: Props) {
         type="button"
         disabled={busy}
         onClick={() => void validate("VALIDATE")}
-        className="rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
+        className="min-h-11 rounded-lg bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] px-3 py-2 text-xs font-semibold text-white transition-all hover:shadow-md disabled:opacity-50"
       >
         Validar
       </button>
@@ -108,7 +108,7 @@ export function GestionValidacion({ initial }: Props) {
         type="button"
         disabled={busy}
         onClick={() => void validate("REJECT")}
-        className="rounded-lg border border-danger bg-danger/10 px-3 py-2 text-xs font-semibold text-danger hover:bg-danger/20 disabled:opacity-50"
+        className="min-h-11 rounded-lg border border-danger bg-danger/10 px-3 py-2 text-xs font-semibold text-danger transition-all hover:bg-danger/20 disabled:opacity-50"
       >
         Rechazar
       </button>
@@ -116,7 +116,7 @@ export function GestionValidacion({ initial }: Props) {
         type="button"
         disabled={busy}
         onClick={() => void validate("REQUEST_CORRECTION")}
-        className="rounded-lg border border-warning bg-warning/10 px-3 py-2 text-xs font-semibold text-warning hover:bg-warning/20 disabled:opacity-50"
+        className="min-h-11 rounded-lg border border-warning bg-warning/10 px-3 py-2 text-xs font-semibold text-warning transition-all hover:bg-warning/20 disabled:opacity-50"
       >
         Corregir
       </button>
@@ -136,7 +136,7 @@ export function GestionValidacion({ initial }: Props) {
               key={it.id}
               role="presentation"
               onClick={() => onSelect(it)}
-              className={`cursor-pointer text-left ${selected?.id === it.id ? "ring-2 ring-primary/40 ring-offset-2 rounded-card" : ""}`}
+              className={`cursor-pointer text-left transition-transform hover:-translate-y-0.5 ${selected?.id === it.id ? "rounded-xl ring-2 ring-[#1A4B8C]/40 ring-offset-2" : ""}`}
             >
               <PqrsCard
                 item={it}
@@ -149,16 +149,15 @@ export function GestionValidacion({ initial }: Props) {
           ))}
         </div>
       </div>
-      <aside className="rounded-card border border-neutral-100 bg-white p-4 shadow-card">
+      <aside className="rounded-xl border border-[#1A4B8C]/20 bg-white p-4 shadow-sm">
         {!selected ? (
           <p className="text-sm text-neutral-900/60">Seleccione una PQRS.</p>
         ) : (
           <>
-            <div className="flex gap-2 border-b border-neutral-100 pb-3">
+            <div className="flex gap-2 border-b border-[#1A4B8C]/10 pb-3">
               {(
                 [
                   ["resumen", "Resumen IA"],
-                  ["pre", "Pre-clasificación"],
                   ["original", "PQRS original"]
                 ] as const
               ).map(([k, lab]) => (
@@ -169,8 +168,10 @@ export function GestionValidacion({ initial }: Props) {
                     setTab(k);
                     if (k === "resumen" && !summary) void loadSummary(selected.id);
                   }}
-                  className={`rounded-md px-2 py-1 text-xs font-semibold ${
-                    tab === k ? "bg-primary text-white" : "text-neutral-700 hover:bg-neutral-50"
+                  className={`min-h-11 rounded-md px-2 py-1 text-xs font-semibold transition-all ${
+                    tab === k
+                      ? "bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] text-white shadow-sm"
+                      : "text-neutral-700 hover:bg-[#eff6ff]"
                   }`}
                 >
                   {lab}
@@ -198,30 +199,16 @@ export function GestionValidacion({ initial }: Props) {
                   <p className="text-neutral-900/60">Pulse &quot;Resumen IA&quot; para generar o ver síntesis.</p>
                 )
               ) : null}
-              {tab === "pre" && detail ? (
-                <div className="space-y-2">
-                  <p>
-                    <span className="font-semibold">Clasificación:</span> {detail.estado_clasificacion}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Confianza IA:</span>{" "}
-                    {detail.confianza_clasificacion != null
-                      ? `${Math.round(Number(detail.confianza_clasificacion) * 100)}%`
-                      : "—"}
-                  </p>
-                  <p className="text-xs text-neutral-900/70">{detail.razon_rechazo || "Sin motivo de rechazo."}</p>
-                </div>
-              ) : null}
               {tab === "original" && detail ? (
                 <div className="space-y-3">
                   <pre className="whitespace-pre-wrap text-xs text-neutral-900">{detail.contenido}</pre>
-                  <div className="rounded-lg border border-neutral-200 bg-white p-2">{actionButtons}</div>
+                  <div className="rounded-lg border border-[#1A4B8C]/15 bg-white p-2">{actionButtons}</div>
                 </div>
               ) : null}
             </div>
-            <div className="mt-4 space-y-2 border-t border-neutral-100 pt-4">
+            <div className="mt-4 space-y-2 border-t border-[#1A4B8C]/10 pt-4">
               <textarea
-                className="w-full rounded-lg border border-neutral-200 p-2 text-xs"
+                className="w-full rounded-lg border border-neutral-200 p-2 text-xs outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 rows={3}
                 placeholder="Nota para rechazo/corrección (opcional)"
                 value={note}
