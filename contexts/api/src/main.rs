@@ -7,6 +7,7 @@ use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
+mod co_calendar;
 mod domain;
 mod error;
 mod handlers;

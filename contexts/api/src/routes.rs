@@ -3,13 +3,14 @@ use axum::{
     Router,
 };
 
-use crate::handlers::{assist, banco_qa, dashboard, health, pqrs, secretarias};
+use crate::handlers::{alertas, assist, banco_qa, dashboard, health, pqrs, secretarias};
 use crate::state::AppState;
 
 /// Rutas bajo prefijo `/api/v1`.
 pub fn api_v1_router(state: AppState) -> Router {
     Router::new()
         .route("/health", get(health::get_health))
+        .route("/alertas", get(alertas::list_alertas))
         .route("/pqrs", get(pqrs::list_pqrs))
         .route("/pqrs/historial/aceptadas", get(pqrs::historial_aceptadas))
         .route("/pqrs/historial/rechazadas", get(pqrs::historial_rechazadas))

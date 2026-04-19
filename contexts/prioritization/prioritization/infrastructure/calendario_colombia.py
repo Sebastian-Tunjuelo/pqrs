@@ -41,3 +41,10 @@ def cuenta_dias_habiles_entre(inicio: date, fin: date) -> int:
         if _es_dia_habil(d):
             n += 1
     return n
+
+
+def dias_habiles_restantes_hasta(hoy: date, limite: date) -> int:
+    """Días hábiles colombianos entre mañana (desde hoy) y ``limite`` inclusive; negativo si venció."""
+    if limite < hoy:
+        return -cuenta_dias_habiles_entre(limite, hoy)
+    return cuenta_dias_habiles_entre(hoy, limite)

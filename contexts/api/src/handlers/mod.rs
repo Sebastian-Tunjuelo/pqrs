@@ -1,3 +1,4 @@
+pub mod alertas;
 pub mod assist;
 pub mod banco_qa;
 pub mod dashboard;
