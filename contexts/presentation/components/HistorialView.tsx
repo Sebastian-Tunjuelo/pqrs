@@ -196,11 +196,11 @@ export function HistorialView() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-card border border-neutral-100 bg-white p-4 shadow-card">
+      <div className="rounded-xl border border-[#1A4B8C]/20 bg-white p-4 shadow-sm">
         <h2 className="text-base font-semibold text-neutral-900">Filtros</h2>
         <div className="mt-4 space-y-4">
-          <fieldset className="rounded-lg border border-neutral-200 p-3">
-            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <fieldset className="rounded-lg border border-[#1A4B8C]/20 p-3">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-[#1A4B8C]/80">
               Clasificación y seguimiento
             </legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -209,7 +209,7 @@ export function HistorialView() {
                 <select
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 >
                   <option value="">Todos</option>
                   {(["P", "Q", "R", "S", "D"] as const).map((k) => (
@@ -224,7 +224,7 @@ export function HistorialView() {
                 <select
                   value={clasif}
                   onChange={(e) => setClasif(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 >
                   <option value="">Todas</option>
                   <option value="ACEPTADA">ACEPTADA</option>
@@ -237,7 +237,7 @@ export function HistorialView() {
                 <select
                   value={gestion}
                   onChange={(e) => setGestion(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 >
                   <option value="">Todos</option>
                   <option value="PENDIENTE">PENDIENTE</option>
@@ -251,7 +251,7 @@ export function HistorialView() {
                 <select
                   value={validacion}
                   onChange={(e) => setValidacion(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 >
                   <option value="">Todas</option>
                   <option value="PENDING_VALIDATION">PENDING_VALIDATION</option>
@@ -265,7 +265,7 @@ export function HistorialView() {
                 <select
                   value={riesgo}
                   onChange={(e) => setRiesgo(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 >
                   <option value="">Todos</option>
                   <option value="CRITICO">CRITICO</option>
@@ -276,8 +276,8 @@ export function HistorialView() {
               </label>
             </div>
           </fieldset>
-          <fieldset className="rounded-lg border border-neutral-200 p-3">
-            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <fieldset className="rounded-lg border border-[#1A4B8C]/20 p-3">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-[#1A4B8C]/80">
               Dependencia y fechas
             </legend>
             <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -286,7 +286,7 @@ export function HistorialView() {
                 <select
                   value={secretaria}
                   onChange={(e) => setSecretaria(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 >
                   <option value="">Todas</option>
                   {secretariasOpts.map((s) => (
@@ -302,7 +302,7 @@ export function HistorialView() {
                   type="date"
                   value={desde}
                   onChange={(e) => setDesde(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 />
               </label>
               <label className="text-xs text-neutral-600">
@@ -311,7 +311,7 @@ export function HistorialView() {
                   type="date"
                   value={hasta}
                   onChange={(e) => setHasta(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1.5 text-sm"
+                  className="mt-1 min-h-11 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm outline-none ring-[#1A4B8C] focus-visible:ring-2"
                 />
               </label>
             </div>
@@ -324,7 +324,7 @@ export function HistorialView() {
               setPage(1);
               void loadPage(1);
             }}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+            className="min-h-11 rounded-lg bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] px-4 py-2 text-sm font-semibold text-white transition-all hover:shadow-md"
           >
             Aplicar filtros
           </button>
@@ -332,14 +332,14 @@ export function HistorialView() {
             type="button"
             onClick={exportCurrent}
             disabled={!data?.items.length}
-            className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium hover:bg-neutral-50 disabled:opacity-50"
+            className="min-h-11 rounded-lg border border-[#1A4B8C]/20 bg-white px-4 py-2 text-sm font-medium text-[#1A4B8C] transition-all hover:bg-[#eff6ff] disabled:opacity-50"
           >
             Exportar CSV (página)
           </button>
           <button
             type="button"
             onClick={() => void exportAllPages()}
-            className="rounded-lg border border-accent/50 bg-accent/15 px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-accent/25"
+            className="min-h-11 rounded-lg border border-[#FF8C00]/40 bg-[#FF8C00]/10 px-4 py-2 text-sm font-medium text-neutral-900 transition-all hover:bg-[#FF8C00]/20"
           >
             Exportar CSV (todo el filtro)
           </button>
@@ -350,8 +350,8 @@ export function HistorialView() {
         <p className="rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger">{err}</p>
       ) : null}
 
-      <div className="rounded-card border border-neutral-100 bg-white shadow-card">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100 px-4 py-3">
+      <div className="overflow-hidden rounded-xl border border-[#1A4B8C]/20 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1A4B8C]/10 bg-gradient-to-r from-[#1A4B8C]/5 to-[#00A8E8]/5 px-4 py-3">
           <p className="text-sm font-medium text-neutral-900">
             {data ? `Resultados: ${data.total} PQRS` : "Cargando…"}
           </p>
@@ -362,7 +362,7 @@ export function HistorialView() {
             <caption className="sr-only">
               Tabla de PQRS: radicado, fechas, tipo, secretaría sugerida, estado y días restantes
             </caption>
-            <thead className="bg-neutral-50 text-xs font-semibold uppercase text-neutral-600">
+            <thead className="bg-[#eff6ff] text-xs font-semibold uppercase text-[#1A4B8C]">
               <tr>
                 <th className="px-3 py-2">Radicado</th>
                 <th className="px-3 py-2">Fecha</th>
@@ -382,7 +382,7 @@ export function HistorialView() {
                   <Fragment key={r.id}>
                     <tr
                       onClick={() => void toggleExpandRow(r.id)}
-                      className={`border-t border-neutral-100 ${isExpanded ? "bg-primary/5" : "hover:bg-neutral-50/80"} cursor-pointer`}
+                      className={`cursor-pointer border-t border-[#1A4B8C]/10 transition-colors ${isExpanded ? "bg-[#eff6ff]" : "hover:bg-[#eff6ff]/60"}`}
                     >
                       <td className="px-3 py-2 font-mono text-xs">{r.id_externo ?? r.id.slice(0, 8)}</td>
                       <td className="px-3 py-2 text-xs">{r.fecha_radicado?.slice(0, 10)}</td>
@@ -405,9 +405,9 @@ export function HistorialView() {
                       </td>
                     </tr>
                     {isExpanded ? (
-                      <tr className="border-t border-neutral-100 bg-white">
+                      <tr className="border-t border-[#1A4B8C]/10 bg-white">
                         <td colSpan={6} className="px-3 py-3">
-                          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                          <div className="rounded-lg border border-[#1A4B8C]/15 bg-[#eff6ff]/40 p-3">
                             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-600">
                               PQRS completa
                             </p>
@@ -431,12 +431,12 @@ export function HistorialView() {
           </table>
         </div>
         {data && data.total > perPage ? (
-          <div className="flex items-center justify-between border-t border-neutral-100 px-4 py-3 text-sm">
+          <div className="flex items-center justify-between border-t border-[#1A4B8C]/10 px-4 py-3 text-sm">
             <button
               type="button"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="rounded-md border px-3 py-1 disabled:opacity-40"
+              className="min-h-11 rounded-lg border border-[#1A4B8C]/20 px-3 py-1 text-[#1A4B8C] hover:bg-[#eff6ff] disabled:opacity-40"
             >
               Anterior
             </button>
@@ -447,7 +447,7 @@ export function HistorialView() {
               type="button"
               disabled={page * perPage >= data.total}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-md border px-3 py-1 disabled:opacity-40"
+              className="min-h-11 rounded-lg border border-[#1A4B8C]/20 px-3 py-1 text-[#1A4B8C] hover:bg-[#eff6ff] disabled:opacity-40"
             >
               Siguiente
             </button>

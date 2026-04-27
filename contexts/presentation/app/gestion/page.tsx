@@ -23,8 +23,10 @@ export default async function GestionPage() {
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error desconocido";
     return (
-      <main>
-        <h1 className="mb-2 text-2xl font-bold text-neutral-900">Gestión</h1>
+      <main className="space-y-4">
+        <section className="rounded-2xl border border-[#1A4B8C]/20 bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] px-6 py-6 text-white shadow-lg">
+          <h1 className="text-2xl font-bold">Gestión</h1>
+        </section>
         <div className="rounded-xl border border-danger/30 bg-danger/10 p-4 text-sm text-danger">
           <p className="font-medium">No se pudo cargar la API</p>
           <p className="mt-1">{msg}</p>
@@ -35,20 +37,21 @@ export default async function GestionPage() {
 
   return (
     <main className="space-y-10">
-      <div>
-        <h1 className="text-2xl font-bold text-neutral-900">Gestión</h1>
-        <p className="mt-1 text-sm text-neutral-900/60">
+      <section className="rounded-2xl border border-[#1A4B8C]/20 bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] px-6 py-6 text-white shadow-lg">
+        <p className="text-xs font-semibold uppercase tracking-wide text-white/80">Módulo operativo</p>
+        <h1 className="mt-1 text-2xl font-bold">Gestión y Validación</h1>
+        <p className="mt-1 text-sm text-white/90">
           Validación humana de clasificación IA, respondidas y cola priorizada (Ley 1755).
         </p>
         <p className="mt-2 text-sm">
           <Link
             href="/asistente?tab=gestion"
-            className="font-medium text-primary underline decoration-accent underline-offset-2 hover:opacity-90"
+            className="inline-flex min-h-11 items-center rounded-lg bg-white/15 px-3 font-medium text-white underline decoration-[#FF8C00] underline-offset-2 hover:bg-white/25"
           >
             Asistente: borrador de mensaje para el equipo de gestión
           </Link>
         </p>
-      </div>
+      </section>
 
       <AlertaBanner alertas={alertas} />
 

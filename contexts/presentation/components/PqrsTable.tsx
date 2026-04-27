@@ -30,18 +30,18 @@ export function PqrsTable({
 }) {
   if (!items.length) {
     return (
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-2 text-base font-semibold text-slate-800">{title}</h2>
-        <p className="text-sm text-slate-500">{emptyMessage ?? "Sin registros."}</p>
+      <section className="rounded-xl border border-[#1A4B8C]/20 bg-white p-6 shadow-sm">
+        <h2 className="mb-2 text-base font-semibold text-neutral-900">{title}</h2>
+        <p className="text-sm text-neutral-500">{emptyMessage ?? "Sin registros."}</p>
       </section>
     );
   }
 
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-4 py-3">
-        <h2 className="text-base font-semibold text-slate-800">{title}</h2>
-        <p className="text-xs text-slate-500">
+    <section className="overflow-hidden rounded-xl border border-[#1A4B8C]/20 bg-white shadow-sm">
+      <div className="border-b border-[#1A4B8C]/10 bg-gradient-to-r from-[#1A4B8C]/5 to-[#00A8E8]/5 px-4 py-3">
+        <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
+        <p className="text-xs text-neutral-500">
           {items.length} registro{items.length === 1 ? "" : "s"}
         </p>
       </div>
@@ -53,7 +53,7 @@ export function PqrsTable({
         }
       >
         <table className="min-w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+          <thead className="bg-[#eff6ff] text-xs uppercase tracking-wide text-[#1A4B8C]">
             <tr>
               <th className="px-4 py-2">Tipo</th>
               <th className="px-4 py-2">Contenido</th>
@@ -64,25 +64,25 @@ export function PqrsTable({
               <th className="px-4 py-2">Plazo (cal.)</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-[#1A4B8C]/10">
             {items.map((row) => (
-              <tr key={row.id} className="hover:bg-slate-50/80">
+              <tr key={row.id} className="transition-colors hover:bg-[#eff6ff]/60">
                 <td className="max-w-[10rem] whitespace-normal px-4 py-2 text-xs leading-snug">
                   {tipoConSignificado(row.tipo)}
                 </td>
-                <td className="max-w-md px-4 py-2 text-slate-700">
+                <td className="max-w-md px-4 py-2 text-neutral-700">
                   <Link
                     href={`/pqrs/${row.id}`}
-                    className="group block rounded-md px-1 py-0.5 outline-none ring-brand-400 hover:bg-brand-50 focus-visible:ring-2"
+                    className="group block min-h-11 rounded-md px-1 py-1 outline-none ring-[#1A4B8C] hover:bg-[#eff6ff] focus-visible:ring-2"
                     title="Ver texto completo"
                   >
-                    <span className="line-clamp-2 group-hover:text-brand-950">{row.contenido}</span>
-                    <span className="mt-1 block text-xs font-medium text-brand-600 underline-offset-2 group-hover:underline">
+                    <span className="line-clamp-2 group-hover:text-[#1A4B8C]">{row.contenido}</span>
+                    <span className="mt-1 block text-xs font-semibold text-[#1A4B8C] underline-offset-2 group-hover:underline">
                       Ver texto completo
                     </span>
                   </Link>
                 </td>
-                <td className="whitespace-nowrap px-4 py-2 text-slate-600">
+                <td className="whitespace-nowrap px-4 py-2 text-neutral-600">
                   {fmtDate(row.fecha_radicado)}
                 </td>
                 <td className="whitespace-nowrap px-4 py-2 text-xs">{row.estado_clasificacion}</td>

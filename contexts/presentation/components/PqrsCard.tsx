@@ -74,7 +74,7 @@ export function PqrsCard({ item, lead, secretariaLabel, onValidate, onCorrect }:
   const ext = item.id_externo || item.id.slice(0, 8);
 
   return (
-    <article className="rounded-card border border-neutral-100 bg-white p-4 shadow-card">
+    <article className="rounded-xl border border-[#1A4B8C]/20 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <span
@@ -134,7 +134,7 @@ export function PqrsCard({ item, lead, secretariaLabel, onValidate, onCorrect }:
             e.stopPropagation();
             onValidate?.();
           }}
-          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+          className="min-h-11 rounded-lg bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:shadow-md"
         >
           Validar ✓
         </button>
@@ -144,14 +144,14 @@ export function PqrsCard({ item, lead, secretariaLabel, onValidate, onCorrect }:
             e.stopPropagation();
             onCorrect?.();
           }}
-          className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-900 hover:bg-neutral-50"
+          className="min-h-11 rounded-lg border border-[#1A4B8C]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[#1A4B8C] transition-colors hover:bg-[#eff6ff]"
         >
           Corregir ✏
         </button>
         <Link
           href={`/pqrs/${item.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+          className="inline-flex min-h-11 items-center rounded-lg px-3 py-1.5 text-xs font-semibold text-[#1A4B8C] underline-offset-2 hover:bg-[#eff6ff] hover:underline"
         >
           Ver detalle →
         </Link>

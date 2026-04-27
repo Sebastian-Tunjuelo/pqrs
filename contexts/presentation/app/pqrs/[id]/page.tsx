@@ -63,7 +63,7 @@ export default async function PqrsDetallePage({ params }: { params: { id: string
       <nav aria-label="Migas de pan" className="text-sm text-neutral-600">
         <ol className="flex flex-wrap items-center gap-1">
           <li>
-            <Link href="/" className="text-primary hover:underline">
+            <Link href="/" className="text-[#1A4B8C] hover:underline">
               Inicio
             </Link>
           </li>
@@ -71,7 +71,7 @@ export default async function PqrsDetallePage({ params }: { params: { id: string
             /
           </li>
           <li>
-            <Link href="/historial" className="text-primary hover:underline">
+            <Link href="/historial" className="text-[#1A4B8C] hover:underline">
               Historial
             </Link>
           </li>
@@ -84,20 +84,20 @@ export default async function PqrsDetallePage({ params }: { params: { id: string
         </ol>
       </nav>
       <nav className="flex flex-wrap gap-3 text-xs text-neutral-500" aria-label="Accesos rápidos">
-        <Link href="/gestion" className="text-primary hover:underline">
+        <Link href="/gestion" className="text-[#1A4B8C] hover:underline">
           Gestión
         </Link>
         <span aria-hidden>·</span>
-        <Link href="/asistente" className="text-primary hover:underline">
+        <Link href="/asistente" className="text-[#1A4B8C] hover:underline">
           Asistente
         </Link>
       </nav>
 
-      <header className="rounded-xl border border-slate-200 bg-gradient-to-br from-brand-50 to-white p-6 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-brand-800">Título de la PQRS</p>
-        <h1 className="mt-2 text-2xl font-bold leading-snug text-slate-900">{titulo}</h1>
-        <p className="mt-3 text-sm text-slate-600">
-          <span className="font-mono font-medium text-slate-800">{pqrs.id_externo ?? pqrs.id}</span>
+      <header className="rounded-xl border border-[#1A4B8C]/20 bg-gradient-to-br from-[#1A4B8C] to-[#0077C8] p-6 text-white shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-wide text-white/80">Título de la PQRS</p>
+        <h1 className="mt-2 text-2xl font-bold leading-snug">{titulo}</h1>
+        <p className="mt-3 text-sm text-white/90">
+          <span className="font-mono font-medium text-white">{pqrs.id_externo ?? pqrs.id}</span>
           {" · "}
           {etiquetaTipo(pqrs.tipo)}
           {" · Radicado "}

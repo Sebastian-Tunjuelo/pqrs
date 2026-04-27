@@ -9,7 +9,7 @@ import type { MetricasDashboard, TerritorioDashboard } from "@/lib/types";
 const DashboardMap = dynamic(() => import("@/components/DashboardMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-[420px] items-center justify-center rounded-xl border border-slate-200 bg-white text-sm text-slate-500">
+    <div className="flex h-[420px] items-center justify-center rounded-xl border border-[#1A4B8C]/20 bg-white text-sm text-[#1A4B8C]">
       Cargando mapa…
     </div>
   )
@@ -26,8 +26,10 @@ export default async function DashboardPage() {
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Error desconocido";
     return (
-      <main>
-        <h1 className="mb-2 text-2xl font-bold text-slate-900">Dashboard</h1>
+      <main className="space-y-4">
+        <section className="rounded-2xl border border-[#1A4B8C]/20 bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] px-6 py-6 text-white shadow-lg">
+          <h1 className="text-2xl font-bold">Dashboard Analítico</h1>
+        </section>
         <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
           <p className="font-medium">No se pudo cargar la API</p>
           <p className="mt-1">{msg}</p>
@@ -53,12 +55,13 @@ export default async function DashboardPage() {
 
   return (
     <main className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-slate-600">
+      <section className="rounded-2xl border border-[#1A4B8C]/20 bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] px-6 py-6 text-white shadow-lg">
+        <p className="text-xs font-semibold uppercase tracking-wide text-white/80">Módulo analítico</p>
+        <h1 className="mt-1 text-2xl font-bold">Dashboard Analítico</h1>
+        <p className="mt-1 text-sm text-white/90">
           Resumen operativo y territorio (comunas Medellín + datos de Postgres).
         </p>
-      </div>
+      </section>
       <MetricCards data={metricas} />
       <div className="grid gap-8 lg:grid-cols-2">
         <DashboardMap countsByCodigo={countsByCodigo} estadosByCodigo={estadosByCodigo} />

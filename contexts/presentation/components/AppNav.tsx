@@ -17,7 +17,7 @@ export function AppNav() {
 
   return (
     <aside
-      className={`hidden shrink-0 border-r border-neutral-100 bg-white transition-[width] duration-200 ease-out md:block ${
+      className={`hidden shrink-0 border-r border-[#1A4B8C]/20 bg-gradient-to-b from-[#1A4B8C] to-[#0077C8] text-white transition-[width] duration-200 ease-out md:block ${
         open ? "w-56" : "w-[4.5rem]"
       }`}
     >
@@ -25,7 +25,7 @@ export function AppNav() {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+          className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-white/30 bg-white/10 text-white hover:bg-white/20"
           title={open ? "Contraer menú" : "Expandir menú"}
           aria-expanded={open}
         >
@@ -33,14 +33,14 @@ export function AppNav() {
         </button>
         <Link
           href="/"
-          className={`block px-2 ${!open ? "text-center" : ""} ${pathname === "/" ? "rounded-lg border border-primary/30 bg-primary/5 py-1" : ""}`}
+          className={`block rounded-xl px-2 py-2 ${!open ? "text-center" : ""} ${pathname === "/" ? "border border-white/40 bg-white/15" : "border border-transparent hover:bg-white/10"}`}
           aria-current={pathname === "/" ? "page" : undefined}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-primary">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-white/80">
             {open ? "Alcaldía de Medellín" : "AM"}
           </p>
-          <p className="mt-1 text-lg font-bold text-neutral-900">PQRS</p>
-          {open ? <p className="text-xs text-neutral-900/50">Validación + IA</p> : null}
+          <p className="mt-1 text-lg font-bold text-white">PQRS</p>
+          {open ? <p className="text-xs text-white/75">Validación + IA</p> : null}
         </Link>
         <nav className="flex flex-col gap-1 text-sm font-medium" aria-label="Navegación principal">
           {links.map(({ href, label }) => {
@@ -51,9 +51,13 @@ export function AppNav() {
                 href={href}
                 title={!open ? label : undefined}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-lg py-2 text-neutral-700 transition hover:bg-neutral-50 hover:text-primary ${
+                className={`rounded-xl py-2.5 transition ${
                   open ? "px-3" : "px-0 text-center text-xs"
-                } ${active ? "border-l-2 border-primary bg-primary/5 font-semibold text-primary" : ""}`}
+                } ${
+                  active
+                    ? "bg-white text-[#1A4B8C] shadow-sm"
+                    : "text-white/85 hover:bg-white/15 hover:text-white"
+                }`}
               >
                 {open ? label : label.slice(0, 2)}
               </Link>

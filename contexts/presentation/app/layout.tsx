@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 
 import AppHeader from "@/components/AppHeader";
 import { AppNav } from "@/components/AppNav";
@@ -15,7 +15,7 @@ const mobileLinks = [
   ["/asistente", "Asistente"]
 ] as const;
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
 export const metadata: Metadata = {
   title: "PQRS Medellín",
   description: "Historial, gestión, dashboard y asistente — Secretaría de Desarrollo Económico"
@@ -23,12 +23,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es" className={inter.variable}>
-      <body className={`${inter.className} min-h-screen bg-neutral-50`}>
-        <div className="bg-primary px-3 py-1.5 text-center text-[11px] font-medium text-white md:text-left">
+    <html lang="es" className={manrope.variable}>
+      <body className={`${manrope.className} min-h-screen bg-gradient-to-b from-[#eff6ff] via-white to-[#f4f4f4]`}>
+        <div className="bg-gradient-to-r from-[#1A4B8C] to-[#0077C8] px-3 py-1.5 text-center text-[11px] font-medium text-white md:text-left">
           <a
             href="#contenido-principal"
-            className="underline decoration-white/70 underline-offset-2 outline-none ring-offset-primary focus-visible:ring-2 focus-visible:ring-white"
+            className="underline decoration-white/70 underline-offset-2 outline-none ring-offset-[#1A4B8C] focus-visible:ring-2 focus-visible:ring-white"
           >
             Saltar al contenido
           </a>
@@ -37,14 +37,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </span>
           <span className="hidden sm:inline">Versión demo — Ley 1755 de 2015 (PQRS)</span>
         </div>
-        <header className="border-b border-neutral-100 bg-white px-3 py-2 md:hidden">
+        <header className="border-b border-[#1A4B8C]/10 bg-white/90 px-3 py-2 backdrop-blur md:hidden">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <Link href="/" className="text-sm font-bold text-primary">
+            <Link href="/" className="text-sm font-bold text-[#1A4B8C]">
               PQRS Medellín
             </Link>
             <nav className="flex flex-wrap gap-2 text-xs font-medium">
               {mobileLinks.map(([href, label]) => (
-                <Link key={href} href={href} className="text-neutral-700 hover:text-primary">
+                <Link
+                  key={href}
+                  href={href}
+                  className="inline-flex min-h-11 items-center rounded-lg px-2 text-neutral-700 hover:bg-[#1A4B8C]/5 hover:text-[#1A4B8C]"
+                >
                   {label}
                 </Link>
               ))}
@@ -62,7 +66,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             >
               {children}
             </main>
-            <footer className="border-t border-neutral-100 bg-white py-3 text-center text-xs text-neutral-900/60">
+            <footer className="border-t border-[#1A4B8C]/10 bg-white/80 py-3 text-center text-xs text-neutral-900/70">
               Alcaldía de Medellín — PQRS (demo técnico Ley 1755)
             </footer>
           </div>
